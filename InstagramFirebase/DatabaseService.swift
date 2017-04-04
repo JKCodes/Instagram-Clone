@@ -111,7 +111,7 @@ class DatabaseService {
     }
     
     /// For simple retrieval such as a single message or a user
-    func retrieveOnce(queryString: String, type: DataTypes, onComplete: DataSnapshotCompletion?) {
+    func retrieveSingleObject(queryString: String, type: DataTypes, onComplete: DataSnapshotCompletion?) {
         guard let currentId = AuthenticationService.shared.currentId() else { return }
         
         let ref: FIRDatabaseReference
@@ -131,7 +131,7 @@ class DatabaseService {
     }
     
     /// For complex retrievals such as user-messages (one or two level search) and a retrieval of group of users or messages (one level search)
-    func retrieveMultipleTimes(type: DataTypes, eventType: FIRDataEventType, fromId: String?, toId: String?, propagate: Bool?, onComplete: DataSnapshotCompletion?) {
+    func retrieveMultiple(type: DataTypes, eventType: FIRDataEventType, fromId: String?, toId: String?, propagate: Bool?, onComplete: DataSnapshotCompletion?) {
         let from = fromId ?? ""
         let to = toId ?? ""
         var prop = propagate ?? true  // if the propagation is set to false, one level searching will be used
@@ -165,7 +165,7 @@ class DatabaseService {
     }
     
     /// For complex removals such as user-message groups
-    func removeMultipleTimes(type: DataTypes, fromId: String?, toId: String?, onComplete: DatabaseReferenceCompletion?) {
+    func removeMultiple(type: DataTypes, fromId: String?, toId: String?, onComplete: DatabaseReferenceCompletion?) {
         let from = fromId ?? ""
         let to = toId ?? ""
         

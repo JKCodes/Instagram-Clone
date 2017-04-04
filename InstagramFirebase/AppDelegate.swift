@@ -19,6 +19,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         
         FIRApp.configure()
+        
+        window = UIWindow()
+        window?.makeKeyAndVisible()
+        
+        window?.rootViewController = CustomTabBarController()
+        
         return true
     }
 

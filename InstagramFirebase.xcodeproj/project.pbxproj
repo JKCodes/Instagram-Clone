@@ -22,6 +22,8 @@
 		D87AA1B11E93AC2100E3E3B6 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87AA1AD1E93AC2100E3E3B6 /* Constants.swift */; };
 		D87AA1B21E93AC2100E3E3B6 /* DatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87AA1AE1E93AC2100E3E3B6 /* DatabaseService.swift */; };
 		D87AA1B31E93AC2100E3E3B6 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87AA1AF1E93AC2100E3E3B6 /* StorageService.swift */; };
+		D87AA1B61E93E6E900E3E3B6 /* CustomTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87AA1B51E93E6E900E3E3B6 /* CustomTabBarController.swift */; };
+		D87AA1B81E93E76100E3E3B6 /* UserProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87AA1B71E93E76100E3E3B6 /* UserProfileController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +44,8 @@
 		D87AA1AD1E93AC2100E3E3B6 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		D87AA1AE1E93AC2100E3E3B6 /* DatabaseService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
 		D87AA1AF1E93AC2100E3E3B6 /* StorageService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
+		D87AA1B51E93E6E900E3E3B6 /* CustomTabBarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomTabBarController.swift; sourceTree = "<group>"; };
+		D87AA1B71E93E76100E3E3B6 /* UserProfileController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserProfileController.swift; sourceTree = "<group>"; };
 		DB0F72C1087A850DF31D3951 /* Pods-InstagramFirebase.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InstagramFirebase.debug.xcconfig"; path = "Pods/Target Support Files/Pods-InstagramFirebase/Pods-InstagramFirebase.debug.xcconfig"; sourceTree = "<group>"; };
 		E41A9B1208B2B6BEEECF2652 /* Pods-InstagramFirebase.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-InstagramFirebase.release.xcconfig"; path = "Pods/Target Support Files/Pods-InstagramFirebase/Pods-InstagramFirebase.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -88,8 +92,8 @@
 			isa = PBXGroup;
 			children = (
 				D87AA1A91E93A8AC00E3E3B6 /* Utils */,
+				D87AA1B41E93E66200E3E3B6 /* Controller */,
 				D83EF5941E9310310062380E /* AppDelegate.swift */,
-				D83EF5961E9310310062380E /* ViewController.swift */,
 				D83EF5981E9310310062380E /* Main.storyboard */,
 				D83EF59B1E9310310062380E /* Assets.xcassets */,
 				D83EF59D1E9310310062380E /* LaunchScreen.storyboard */,
@@ -112,6 +116,16 @@
 				D83EF5AD1E9310EA0062380E /* UIView + Anchors.swift */,
 			);
 			name = Utils;
+			sourceTree = "<group>";
+		};
+		D87AA1B41E93E66200E3E3B6 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				D83EF5961E9310310062380E /* ViewController.swift */,
+				D87AA1B51E93E6E900E3E3B6 /* CustomTabBarController.swift */,
+				D87AA1B71E93E76100E3E3B6 /* UserProfileController.swift */,
+			);
+			name = Controller;
 			sourceTree = "<group>";
 		};
 		E79ED0FB7FFC1EE374E16145 /* Pods */ = {
@@ -250,9 +264,11 @@
 			files = (
 				D87AA1B21E93AC2100E3E3B6 /* DatabaseService.swift in Sources */,
 				D83EF5B31E9310EA0062380E /* UIColor + rgb.swift in Sources */,
+				D87AA1B81E93E76100E3E3B6 /* UserProfileController.swift in Sources */,
 				D83EF5B51E9310EA0062380E /* UIView + Anchors.swift in Sources */,
 				D83EF5B41E9310EA0062380E /* UIImageView + loadImageUsingCache.swift in Sources */,
 				D83EF5971E9310310062380E /* ViewController.swift in Sources */,
+				D87AA1B61E93E6E900E3E3B6 /* CustomTabBarController.swift in Sources */,
 				D87AA1B31E93AC2100E3E3B6 /* StorageService.swift in Sources */,
 				D83EF5951E9310310062380E /* AppDelegate.swift in Sources */,
 				D83EF5AE1E9310EA0062380E /* Alerter.swift in Sources */,
