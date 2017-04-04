@@ -9,9 +9,11 @@
 import Foundation
 import FirebaseStorage
 
-let FIR_CHILD_PROFILEIMG = "profile_images"
-let FIR_CHILD_IMAGE = "message_images"
-let FIR_CHILD_VIDEO = "message_videos"
+typealias StorageMetadataCompletion = (_ errorMsg: String?, _ metadata: FIRStorageMetadata?) -> Void
+
+fileprivate let FIR_CHILD_PROFILEIMG = "profile_images"
+fileprivate let FIR_CHILD_IMAGE = "message_images"
+fileprivate let FIR_CHILD_VIDEO = "message_videos"
 
 enum StorageTypes {
     case profile
@@ -22,7 +24,7 @@ enum StorageTypes {
 
 class StorageService {
 
-    private static let _shared = StorageService()
+    fileprivate static let _shared = StorageService()
     
     static var shared: StorageService {
         return _shared
@@ -44,7 +46,7 @@ class StorageService {
         return rootRef.child(FIR_CHILD_VIDEO)
     }
     
-    func uploadToStorageAndReturn(type: StorageTypes, data: Data?, url: URL?, onComplete: ((_ error: String?, _ metadata: FIRStorageMetadata?) -> Void)?) -> FIRStorageUploadTask {
+    func uploadToStorageAndReturn(type: StorageTypes, data: Data?, url: URL?, onComplete: StorageMetadataCompletion?) -> FIRStorageUploadTask {
         
         let uploadTask: FIRStorageUploadTask?
         
@@ -81,7 +83,7 @@ class StorageService {
         return uploadTask!
     }
     
-    func uploadToStorage(type: StorageTypes, data: Data?, url: URL?, onComplete: ((_ error: String?, _ metadata: FIRStorageMetadata?) -> Void)?) {
+    func uploadToStorage(type: StorageTypes, data: Data?, url: URL?, onComplete: StorageMetadataCompletion?) {
         _ = uploadToStorageAndReturn(type: type, data: data, url: url, onComplete: onComplete)
     }
     

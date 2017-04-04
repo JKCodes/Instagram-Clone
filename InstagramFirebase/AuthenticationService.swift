@@ -9,9 +9,12 @@
 import Foundation
 import FirebaseAuth
 
+typealias UserCompletion = (_ errorMsg: String?, _ data: FIRUser?) -> Void
+
 class AuthenticationService {
     
-    private static let _shared = AuthenticationService()
+    
+    fileprivate static let _shared = AuthenticationService()
     
     static var shared: AuthenticationService {
         return _shared
@@ -25,7 +28,7 @@ class AuthenticationService {
         return nil
     }
     
-    func createUser(email: String, password: String, onComplete: Completion?) {
+    func createUser(email: String, password: String, onComplete: UserCompletion?) {
     
         FIRAuth.auth()?.createUser(withEmail: email, password: password, completion: { [weak self] (user, error) in
             if let error = error {
@@ -38,7 +41,7 @@ class AuthenticationService {
     }
  
     
-    func signin(email: String, password: String, onComplete: Completion?) {
+    func signin(email: String, password: String, onComplete: UserCompletion?) {
         FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { [weak self] (user, error) in
             if let error = error {
                 self?.processFirebaseErrors(error: error as NSError, onComplete: onComplete)
@@ -48,16 +51,16 @@ class AuthenticationService {
         })
     }
     
-    func signout(onCompletion: Completion) {
+    func signout(onCompletion: UserCompletion?) {
         do {
             try FIRAuth.auth()?.signOut()
-            onCompletion(nil, nil)
+            onCompletion?(nil, nil)
         } catch {
-            onCompletion("There was an error while logging you out. Please try again.", nil)
+            onCompletion?("There was an error while logging you out. Please try again.", nil)
         }
     }
     
-    private func processFirebaseErrors(error: NSError, onComplete: Completion?) {
+    fileprivate func processFirebaseErrors(error: NSError, onComplete: UserCompletion?) {
         if let errorCode = FIRAuthErrorCode(rawValue: error._code) {
             switch errorCode {
             case .errorCodeUserNotFound:

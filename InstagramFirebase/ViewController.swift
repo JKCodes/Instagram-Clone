@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, Alerter {
+class ViewController: UIViewController, Alerter, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     fileprivate let contentOffset: CGFloat = 40
     fileprivate let plusPhotoButtonLength: CGFloat = 140
@@ -19,9 +19,11 @@ class ViewController: UIViewController, Alerter {
     fileprivate static let buttonActiveColor: UIColor = .rgb(r: 17, g: 154, b: 237)
     fileprivate static let buttonInactiveColor: UIColor = .rgb(r: 149, g: 204, b: 244)
     
-    let plusPhotoButton: UIButton = {
+    lazy var plusPhotoButton: UIButton = { [weak self] in
+        guard let this = self else { return UIButton() }
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "plus_photo").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(this, action: #selector(handlePlusPhoto), for: .touchUpInside)
         return button
     }()
     
@@ -40,7 +42,7 @@ class ViewController: UIViewController, Alerter {
     lazy var usernameTextField: UITextField = { [weak self] in
         guard let this = self else { return UITextField() }
         let tf = UITextField()
-        tf.placeholder = "Usename"
+        tf.placeholder = "Username"
         tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
@@ -97,6 +99,22 @@ class ViewController: UIViewController, Alerter {
         stackView.anchor(top: plusPhotoButton.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: contentOffset / 2, leftConstant: contentOffset, bottomConstant: 0, rightConstant: contentOffset, widthConstant: 0, heightConstant: stackViewHeight)
     
     }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        
+        if let editedImage = info["UIImagePickerControllerEditedImage"] as? UIImage {
+            plusPhotoButton.setImage(editedImage.withRenderingMode(.alwaysOriginal), for: .normal)
+        } else if let originalImage = info["UIImagePickerControllerOriginalImage"] as? UIImage {
+            plusPhotoButton.setImage(originalImage.withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+        
+        plusPhotoButton.layer.cornerRadius = plusPhotoButton.frame.width / 2
+        plusPhotoButton.layer.masksToBounds = true
+        plusPhotoButton.layer.borderColor = UIColor.black.cgColor
+        plusPhotoButton.layer.borderWidth = 3
+        
+        dismiss(animated: true, completion: nil)
+    }
 
 }
 
@@ -106,13 +124,56 @@ extension ViewController {
         guard let email = emailTextField.text, let username = usernameTextField.text, let password = passwordTextField.text else { return }
         if email.characters.count < 1 || username.characters.count < 1 || password.characters.count < 1 { return }
         
-        AuthenticationService.shared.createUser(email: email, password: password) { [weak self] (error, user) in
+        DatabaseService.shared.isUsernameUnique(username: username) { [weak self] (flag) in
             guard let this = self else { return }
-            if let error = error {
-                this.present(this.alertVC(title: "An error has occurred", message: error), animated: true, completion: nil)
+
+            if !flag {
+                this.present(this.alertVC(title: "Duplicate username", message: "The chosen username has already been taken.  Please choose a different username"), animated: true, completion: nil)
+                return
             }
-            
-            
+        
+            AuthenticationService.shared.createUser(email: email, password: password) { [weak self] (error, user) in
+                if let error = error {
+                    this.present(this.alertVC(title: "An error has occurred", message: error), animated: true, completion: nil)
+                    return
+                }
+                
+                guard let image = this.plusPhotoButton.imageView?.image, let uploadData = UIImageJPEGRepresentation(image, 0.3) else { return }
+                
+                StorageService.shared.uploadToStorage(type: .profile, data: uploadData, url: nil, onComplete: { (error, metadata) in
+                    if let error = error {
+                        this.present(this.alertVC(title: "Error saving to storage", message: error), animated: true, completion: nil)
+                        return
+                    }
+                    
+                    guard let profileImageUrl = metadata?.downloadURL()?.absoluteString else { return }
+                
+                    guard let uid = user?.uid else { return }
+
+                    
+                    var dictionaryValues = ["username": username as AnyObject, "profileImageUrl": profileImageUrl as AnyObject]
+                    
+                    DatabaseService.shared.saveData(uid: uid, type: .user, data: dictionaryValues, onComplete: { [weak self] (error, _) in
+                        if let error = error {
+                            this.present(this.alertVC(title: "Error saving to data", message: error), animated: true, completion: nil)
+                            return
+                        }
+                        
+                        
+                        dictionaryValues = [username: 1 as AnyObject]
+                        
+                        DatabaseService.shared.saveData(uid: nil, type: .username, data: dictionaryValues, onComplete: { [weak self] (error, _) in
+                            guard let this = self else { return }
+
+                            if let error = error {
+                                this.present(this.alertVC(title: "Error saving to data", message: error), animated: true, completion: nil)
+                                return
+                            }
+                        })
+                        
+                    })
+                })
+            }
         }
     }
     
@@ -120,5 +181,13 @@ extension ViewController {
         let isFormValid = emailTextField.text?.characters.count ?? 0 > 0 && usernameTextField.text?.characters.count ?? 0 > 0 && passwordTextField.text?.characters.count ?? 0 > 0
         signUpButton.backgroundColor = isFormValid ? ViewController.buttonActiveColor : ViewController.buttonInactiveColor
         signUpButton.isEnabled = isFormValid ? true : false
+    }
+    
+    func handlePlusPhoto() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.allowsEditing = true
+        
+        present(imagePickerController, animated: true, completion: nil)
     }
 }

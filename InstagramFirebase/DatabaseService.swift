@@ -9,13 +9,18 @@
 import Foundation
 import FirebaseDatabase
 
-let FIR_CHILD_USERS = "users"
-let FIR_CHILD_PROFILE = "profile"
-let FIR_CHILD_MESSAGES = "messages"
-let FIR_CHILD_USER_MESSAGES = "user-messages"
+typealias DataSnapshotCompletion = (_ metadata: FIRDataSnapshot?) -> Void
+typealias DatabaseReferenceCompletion = (_ errorMsg: String?, _ ref: FIRDatabaseReference?) -> Void
+
+fileprivate let FIR_CHILD_USERS = "users"
+fileprivate let FIR_CHILD_USERNAMES = "usernames"
+fileprivate let FIR_CHILD_PROFILE = "profile"
+fileprivate let FIR_CHILD_MESSAGES = "messages"
+fileprivate let FIR_CHILD_USER_MESSAGES = "user-messages"
 
 enum DataTypes {
     case user
+    case username
     case message
     case userMessages
 }
@@ -36,6 +41,10 @@ class DatabaseService {
         return rootRef.child(FIR_CHILD_USERS)
     }
     
+    var usernamesRef: FIRDatabaseReference {
+        return rootRef.child(FIR_CHILD_USERNAMES)
+    }
+    
     var messagesRef: FIRDatabaseReference {
         return rootRef.child(FIR_CHILD_MESSAGES)
     }
@@ -44,7 +53,7 @@ class DatabaseService {
         return rootRef.child(FIR_CHILD_USER_MESSAGES)
     }
     
-    func saveData(uid: String?, type: DataTypes, data: Dictionary<String, AnyObject>, fan: Bool = false, onComplete: Completion?) {
+    func saveData(uid: String?, type: DataTypes, data: Dictionary<String, AnyObject>, fan: Bool = false, onComplete: DatabaseReferenceCompletion?) {
         if uid == nil && type == .user { fatalError("uid is required if a user is to be saved") }
         
         let uniqueRef: FIRDatabaseReference
@@ -52,9 +61,10 @@ class DatabaseService {
         switch type {
         case .message, .userMessages: uniqueRef = messagesRef.childByAutoId()
         case .user: uniqueRef = usersRef.child(uid!)
+        case .username: uniqueRef = usernamesRef
         }
         
-        uniqueRef.updateChildValues(data) { [weak self] (error, _) in
+        uniqueRef.updateChildValues(data) { [weak self] (error, ref) in
             if error != nil {
                 onComplete?("Error saving data to the database", nil)
             }
@@ -62,13 +72,22 @@ class DatabaseService {
             if fan {
                 self?.saveFanData(childRef: uniqueRef, data: data, onComplete: onComplete)
             } else {
-                onComplete?(nil, nil)
-                
+                onComplete?(nil, ref)
             }
         }
     }
     
-    private func saveFanData(childRef: FIRDatabaseReference, data: Dictionary<String, AnyObject>, onComplete: Completion?) {
+    func isUsernameUnique(username: String, onComplete: @escaping (_ flag: Bool) -> Void) {
+        usernamesRef.observeSingleEvent(of: .value, with: { (snapshot) in
+            if snapshot.hasChild(username) {
+                onComplete(false)
+            } else {
+                onComplete(true)
+            }
+        }, withCancel: nil)
+    }
+    
+    fileprivate func saveFanData(childRef: FIRDatabaseReference, data: Dictionary<String, AnyObject>, onComplete: DatabaseReferenceCompletion?) {
         guard let fromId = data["fromId"] as? String, let toId = data["toId"] as? String else { return }
         
         let senderRef = userMessagesRef.child(fromId).child(toId)
@@ -76,7 +95,7 @@ class DatabaseService {
         
         let typeId = childRef.key
         
-        senderRef.updateChildValues([typeId: 1]) { (error, _) in
+        senderRef.updateChildValues([typeId: 1]) { (error, ref) in
             if error != nil {
                 onComplete?("Error saving data to the database", nil)
             }
@@ -86,13 +105,13 @@ class DatabaseService {
                     onComplete?("Error saving data to the database", nil)
                 }
                 
-                onComplete?(nil, nil)
+                onComplete?(nil, ref)
             }
         }
     }
     
     /// For simple retrieval such as a single message or a user
-    func retrieveSingleObject(queryString: String, type: DataTypes, onComplete: ((_ snapshot: FIRDataSnapshot) -> Void)?) {
+    func retrieveOnce(queryString: String, type: DataTypes, onComplete: DataSnapshotCompletion?) {
         guard let currentId = AuthenticationService.shared.currentId() else { return }
         
         let ref: FIRDatabaseReference
@@ -100,6 +119,7 @@ class DatabaseService {
         switch type {
         case .user: ref = usersRef.child(queryString)
         case .message: ref = messagesRef.child(queryString)
+        case .username: ref = usernamesRef.child(queryString)
         case .userMessages: ref = userMessagesRef.child(currentId).child(queryString)
         }
         
@@ -111,7 +131,7 @@ class DatabaseService {
     }
     
     /// For complex retrievals such as user-messages (one or two level search) and a retrieval of group of users or messages (one level search)
-    func retrieveMultipleObjects(type: DataTypes, eventType: FIRDataEventType, fromId: String?, toId: String?, propagate: Bool?, onComplete: ((_ snapshot: FIRDataSnapshot) -> Void)?) {
+    func retrieveMultipleTimes(type: DataTypes, eventType: FIRDataEventType, fromId: String?, toId: String?, propagate: Bool?, onComplete: DataSnapshotCompletion?) {
         let from = fromId ?? ""
         let to = toId ?? ""
         var prop = propagate ?? true  // if the propagation is set to false, one level searching will be used
@@ -133,7 +153,7 @@ class DatabaseService {
     }
     
     // For unknown toId
-    private func retrieveFanObjectsForUnknownToId(childRef: FIRDatabaseReference, eventType: FIRDataEventType, onComplete: ((_ snapshot: FIRDataSnapshot) -> Void)?) {
+    fileprivate func retrieveFanObjectsForUnknownToId(childRef: FIRDatabaseReference, eventType: FIRDataEventType, onComplete: DataSnapshotCompletion?) {
         childRef.observe(.childAdded, with: { (snapshot) in
             let typeId = snapshot.key
             
@@ -145,23 +165,23 @@ class DatabaseService {
     }
     
     /// For complex removals such as user-message groups
-    func removeMultipleObjects(type: DataTypes, fromId: String?, toId: String?, onComplete: Completion?) {
+    func removeMultipleTimes(type: DataTypes, fromId: String?, toId: String?, onComplete: DatabaseReferenceCompletion?) {
         let from = fromId ?? ""
         let to = toId ?? ""
         
         guard let ref = getRef(type: type, fromId: from, toId: to) else { return }
         
-        ref.removeValue { (error, _) in
+        ref.removeValue { (error, ref) in
             if error != nil {
                 onComplete?("There was a problem handling the deletion request.  Please try again.", nil)
             }
             
-            onComplete?(nil, nil)
+            onComplete?(nil, ref)
         }
     }
     
     // Used to get refs for retrievals and removals
-    private func getRef(type: DataTypes, fromId: String, toId: String) -> FIRDatabaseReference? {
+    fileprivate func getRef(type: DataTypes, fromId: String, toId: String) -> FIRDatabaseReference? {
         guard var currentId = AuthenticationService.shared.currentId() else { return nil }
         
         if fromId != "" {
@@ -173,6 +193,7 @@ class DatabaseService {
         switch type {
         case .user: ref = usersRef
         case .message: ref = messagesRef
+        case .username: ref = usernamesRef
         case .userMessages: ref = userMessagesRef
         }
         
