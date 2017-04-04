@@ -99,9 +99,9 @@
 		D83EF5931E9310310062380E /* InstagramFirebase */ = {
 			isa = PBXGroup;
 			children = (
+				D87AA1A91E93A8AC00E3E3B6 /* Utils */,
 				D86DBD2B1E940E6000F2E46F /* Login */,
 				D87AA1B91E93EE5D00E3E3B6 /* UserProfile */,
-				D87AA1A91E93A8AC00E3E3B6 /* Utils */,
 				D87AA1B41E93E66200E3E3B6 /* Controller */,
 				D83EF5941E9310310062380E /* AppDelegate.swift */,
 				D83EF5981E9310310062380E /* Main.storyboard */,
