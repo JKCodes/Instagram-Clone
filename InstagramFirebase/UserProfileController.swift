@@ -47,6 +47,7 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     
     fileprivate func setupLogOutButton() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "gear"), style: .plain, target: self, action: #selector(handleLogOut))
+        navigationItem.rightBarButtonItem?.tintColor = .black
     }
     
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
