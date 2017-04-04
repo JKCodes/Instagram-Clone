@@ -15,6 +15,7 @@ class SignUpController: UIViewController, Alerter, UIImagePickerControllerDelega
     fileprivate let plusPhotoTopOffset: CGFloat = 40
     fileprivate let stackViewHeight: CGFloat = 200
     fileprivate let stackViewSpacing: CGFloat = 10
+    fileprivate let alreadyHaveAccountButtonHeight: CGFloat = 50
     
     fileprivate static let buttonActiveColor: UIColor = .rgb(r: 17, g: 154, b: 237)
     fileprivate static let buttonInactiveColor: UIColor = .rgb(r: 149, g: 204, b: 244)
@@ -75,8 +76,28 @@ class SignUpController: UIViewController, Alerter, UIImagePickerControllerDelega
         return button
     }()
     
+    
+    lazy var alreadyHaveAccountButton: UIButton = { [weak self] in
+        guard let this = self else { return UIButton() }
+        let button = UIButton(type: .system)
+        
+        let attributedTitle = NSMutableAttributedString(string: "Already have an account?  ", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14), NSForegroundColorAttributeName: UIColor.lightGray])
+        
+        attributedTitle.append(NSAttributedString(string: "Sign In", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14), NSForegroundColorAttributeName: UIColor.rgb(r: 17, g: 154, b: 237)
+            ]))
+        
+        button.setAttributedTitle(attributedTitle, for: .normal)
+        
+        button.addTarget(this, action: #selector(handleAlreadyHaveAccount), for: .touchUpInside)
+        return button
+    }()
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        view.addSubview(alreadyHaveAccountButton)
+        alreadyHaveAccountButton.anchor(top: nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: alreadyHaveAccountButtonHeight)
         
         view.backgroundColor = .white
         
@@ -195,5 +216,9 @@ extension SignUpController {
         imagePickerController.allowsEditing = true
         
         present(imagePickerController, animated: true, completion: nil)
+    }
+    
+    func handleAlreadyHaveAccount() {
+        _ = navigationController?.popViewController(animated: true)
     }
 }
