@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  SignUpController.swift
 //  InstagramFirebase
 //
 //  Created by Joseph Kim on 4/3/17.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, Alerter, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class SignUpController: UIViewController, Alerter, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     fileprivate let contentOffset: CGFloat = 40
     fileprivate let plusPhotoButtonLength: CGFloat = 140
@@ -78,6 +78,8 @@ class ViewController: UIViewController, Alerter, UIImagePickerControllerDelegate
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.backgroundColor = .white
+        
         view.addSubview(plusPhotoButton)
         
         setupInputFields()
@@ -118,26 +120,29 @@ class ViewController: UIViewController, Alerter, UIImagePickerControllerDelegate
 
 }
 
-extension ViewController {
+extension SignUpController {
     func handleSignUp() {
         
         guard let email = emailTextField.text, let username = usernameTextField.text, let password = passwordTextField.text else { return }
         if email.characters.count < 1 || username.characters.count < 1 || password.characters.count < 1 { return }
         
-        DatabaseService.shared.isUsernameUnique(username: username) { [weak self] (flag) in
+        AuthenticationService.shared.createUser(email: email, password: password) { [weak self] (error, user) in
             guard let this = self else { return }
-
-            if !flag {
-                this.present(this.alertVC(title: "Duplicate username", message: "The chosen username has already been taken.  Please choose a different username"), animated: true, completion: nil)
+            
+            if let error = error {
+                this.present(this.alertVC(title: "An error has occurred", message: error), animated: true, completion: nil)
                 return
             }
-        
-            AuthenticationService.shared.createUser(email: email, password: password) { [weak self] (error, user) in
-                if let error = error {
-                    this.present(this.alertVC(title: "An error has occurred", message: error), animated: true, completion: nil)
+            
+            DatabaseService.shared.isUsernameUnique(username: username) { [weak self] (flag) in
+                guard let this = self else { return }
+                
+                if !flag {
+                    this.present(this.alertVC(title: "Duplicate username", message: "The chosen username has already been taken.  Please choose a different username"), animated: true, completion: nil)
+                    AuthenticationService.shared.deleteCurrentUser { return }
                     return
                 }
-                
+            
                 guard let image = this.plusPhotoButton.imageView?.image, let uploadData = UIImageJPEGRepresentation(image, 0.3) else { return }
                 
                 StorageService.shared.uploadToStorage(type: .profile, data: uploadData, url: nil, onComplete: { (error, metadata) in
@@ -147,9 +152,9 @@ extension ViewController {
                     }
                     
                     guard let profileImageUrl = metadata?.downloadURL()?.absoluteString else { return }
-                
+                    
                     guard let uid = user?.uid else { return }
-
+                    
                     
                     var dictionaryValues = ["username": username as AnyObject, "profileImageUrl": profileImageUrl as AnyObject]
                     
@@ -164,7 +169,7 @@ extension ViewController {
                         
                         DatabaseService.shared.saveData(uid: nil, type: .username, data: dictionaryValues, onComplete: { [weak self] (error, _) in
                             guard let this = self else { return }
-
+                            
                             if let error = error {
                                 this.present(this.alertVC(title: "Error saving to data", message: error), animated: true, completion: nil)
                                 return
@@ -173,13 +178,14 @@ extension ViewController {
                         
                     })
                 })
+        
             }
         }
     }
     
     func handleTextInputChange() {
         let isFormValid = emailTextField.text?.characters.count ?? 0 > 0 && usernameTextField.text?.characters.count ?? 0 > 0 && passwordTextField.text?.characters.count ?? 0 > 0
-        signUpButton.backgroundColor = isFormValid ? ViewController.buttonActiveColor : ViewController.buttonInactiveColor
+        signUpButton.backgroundColor = isFormValid ? SignUpController.buttonActiveColor : SignUpController.buttonInactiveColor
         signUpButton.isEnabled = isFormValid ? true : false
     }
     

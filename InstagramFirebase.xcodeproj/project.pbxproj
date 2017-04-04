@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		1BFE424BECB2184171928D4A /* Pods_InstagramFirebase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AB016D3CDD4C07ED546E455 /* Pods_InstagramFirebase.framework */; };
 		D83EF5951E9310310062380E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5941E9310310062380E /* AppDelegate.swift */; };
-		D83EF5971E9310310062380E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5961E9310310062380E /* ViewController.swift */; };
+		D83EF5971E9310310062380E /* SignUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5961E9310310062380E /* SignUpController.swift */; };
 		D83EF59A1E9310310062380E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D83EF5981E9310310062380E /* Main.storyboard */; };
 		D83EF59C1E9310310062380E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D83EF59B1E9310310062380E /* Assets.xcassets */; };
 		D83EF59F1E9310310062380E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D83EF59D1E9310310062380E /* LaunchScreen.storyboard */; };
@@ -17,6 +17,7 @@
 		D83EF5B31E9310EA0062380E /* UIColor + rgb.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5AB1E9310EA0062380E /* UIColor + rgb.swift */; };
 		D83EF5B41E9310EA0062380E /* UIImageView + loadImageUsingCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5AC1E9310EA0062380E /* UIImageView + loadImageUsingCache.swift */; };
 		D83EF5B51E9310EA0062380E /* UIView + Anchors.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5AD1E9310EA0062380E /* UIView + Anchors.swift */; };
+		D86DBD2D1E940E8300F2E46F /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86DBD2C1E940E8300F2E46F /* LoginController.swift */; };
 		D87AA1AB1E93AAD900E3E3B6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D87AA1AA1E93AAD900E3E3B6 /* GoogleService-Info.plist */; };
 		D87AA1B01E93AC2100E3E3B6 /* AuthenticationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87AA1AC1E93AC2100E3E3B6 /* AuthenticationService.swift */; };
 		D87AA1B11E93AC2100E3E3B6 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87AA1AD1E93AC2100E3E3B6 /* Constants.swift */; };
@@ -33,7 +34,7 @@
 		9AB016D3CDD4C07ED546E455 /* Pods_InstagramFirebase.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_InstagramFirebase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D83EF5911E9310310062380E /* InstagramFirebase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstagramFirebase.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D83EF5941E9310310062380E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D83EF5961E9310310062380E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		D83EF5961E9310310062380E /* SignUpController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpController.swift; sourceTree = "<group>"; };
 		D83EF5991E9310310062380E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D83EF59B1E9310310062380E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D83EF59E1E9310310062380E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -42,6 +43,7 @@
 		D83EF5AB1E9310EA0062380E /* UIColor + rgb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor + rgb.swift"; sourceTree = "<group>"; };
 		D83EF5AC1E9310EA0062380E /* UIImageView + loadImageUsingCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIImageView + loadImageUsingCache.swift"; sourceTree = "<group>"; };
 		D83EF5AD1E9310EA0062380E /* UIView + Anchors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView + Anchors.swift"; sourceTree = "<group>"; };
+		D86DBD2C1E940E8300F2E46F /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 		D87AA1AA1E93AAD900E3E3B6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D87AA1AC1E93AC2100E3E3B6 /* AuthenticationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationService.swift; sourceTree = "<group>"; };
 		D87AA1AD1E93AC2100E3E3B6 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -97,6 +99,7 @@
 		D83EF5931E9310310062380E /* InstagramFirebase */ = {
 			isa = PBXGroup;
 			children = (
+				D86DBD2B1E940E6000F2E46F /* Login */,
 				D87AA1B91E93EE5D00E3E3B6 /* UserProfile */,
 				D87AA1A91E93A8AC00E3E3B6 /* Utils */,
 				D87AA1B41E93E66200E3E3B6 /* Controller */,
@@ -108,6 +111,15 @@
 				D87AA1AA1E93AAD900E3E3B6 /* GoogleService-Info.plist */,
 			);
 			path = InstagramFirebase;
+			sourceTree = "<group>";
+		};
+		D86DBD2B1E940E6000F2E46F /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				D86DBD2C1E940E8300F2E46F /* LoginController.swift */,
+				D83EF5961E9310310062380E /* SignUpController.swift */,
+			);
+			name = Login;
 			sourceTree = "<group>";
 		};
 		D87AA1A91E93A8AC00E3E3B6 /* Utils */ = {
@@ -129,9 +141,7 @@
 		D87AA1B41E93E66200E3E3B6 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				D83EF5961E9310310062380E /* ViewController.swift */,
 				D87AA1B51E93E6E900E3E3B6 /* CustomTabBarController.swift */,
-				D87AA1B71E93E76100E3E3B6 /* UserProfileController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -139,6 +149,7 @@
 		D87AA1B91E93EE5D00E3E3B6 /* UserProfile */ = {
 			isa = PBXGroup;
 			children = (
+				D87AA1B71E93E76100E3E3B6 /* UserProfileController.swift */,
 				D87AA1BA1E93EE7C00E3E3B6 /* UserProfileHeader.swift */,
 				D87AA1BF1E93F10A00E3E3B6 /* User.swift */,
 			);
@@ -286,12 +297,13 @@
 				D87AA1BD1E93EEAB00E3E3B6 /* BaseCell.swift in Sources */,
 				D83EF5B51E9310EA0062380E /* UIView + Anchors.swift in Sources */,
 				D83EF5B41E9310EA0062380E /* UIImageView + loadImageUsingCache.swift in Sources */,
-				D83EF5971E9310310062380E /* ViewController.swift in Sources */,
+				D83EF5971E9310310062380E /* SignUpController.swift in Sources */,
 				D87AA1C01E93F10A00E3E3B6 /* User.swift in Sources */,
 				D87AA1B61E93E6E900E3E3B6 /* CustomTabBarController.swift in Sources */,
 				D87AA1B31E93AC2100E3E3B6 /* StorageService.swift in Sources */,
 				D83EF5951E9310310062380E /* AppDelegate.swift in Sources */,
 				D83EF5AE1E9310EA0062380E /* Alerter.swift in Sources */,
+				D86DBD2D1E940E8300F2E46F /* LoginController.swift in Sources */,
 				D87AA1B01E93AC2100E3E3B6 /* AuthenticationService.swift in Sources */,
 				D87AA1B11E93AC2100E3E3B6 /* Constants.swift in Sources */,
 			);

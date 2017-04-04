@@ -12,6 +12,16 @@ class CustomTabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if AuthenticationService.shared.currentId() == nil {
+            DispatchQueue.main.async { [weak self] in
+                let loginController = LoginController()
+                let navController = UINavigationController(rootViewController: loginController)
+                self?.present(navController, animated: true, completion: nil)
+            }
+            
+            return
+        }
+        
         let layout = UICollectionViewFlowLayout()
         let userProfileVC = UserProfileController(collectionViewLayout: layout)
         userProfileVC.navigationItem.title = "Temp"
@@ -25,7 +35,7 @@ class CustomTabBarController: UITabBarController {
         viewControllers = [userProfileViewController, createTemporaryController(title: "Temp", imageName: "temp"), createTemporaryController(title: "Temp", imageName: "temp"), createTemporaryController(title: "Temp", imageName: "temp"), createTemporaryController(title: "Temp", imageName: "temp")]
     }
     
-    private func createTemporaryController(title: String, imageName: String) -> UINavigationController {
+    fileprivate func createTemporaryController(title: String, imageName: String) -> UINavigationController {
         let viewController = UIViewController()
         viewController.navigationItem.title = title
         viewController.view.backgroundColor = .white

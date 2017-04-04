@@ -25,6 +25,8 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
         
         collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerId)
         collectionView?.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellId)
+        
+        setupLogOutButton()
     }
     
     fileprivate func fetchUser() {
@@ -41,6 +43,10 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
             
             this.collectionView?.reloadData()
         }
+    }
+    
+    fileprivate func setupLogOutButton() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "gear"), style: .plain, target: self, action: #selector(handleLogOut))
     }
     
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -78,5 +84,28 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
         cell.backgroundColor = .blue
         
         return cell
+    }
+}
+
+extension UserProfileController {
+    func handleLogOut() {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { (_) in
+            AuthenticationService.shared.signout(onCompletion: { [weak self] (error, _) in
+                guard let this = self else { return }
+                
+                if let error = error {
+                    this.present(this.alertVC(title: "Error signing out", message: error), animated: true, completion: nil)
+                    return
+                }
+                
+            })
+        }))
+        
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            
+            
+        present(alertController, animated: true, completion: nil)
     }
 }

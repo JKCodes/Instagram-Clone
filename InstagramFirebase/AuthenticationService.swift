@@ -10,6 +10,7 @@ import Foundation
 import FirebaseAuth
 
 typealias UserCompletion = (_ errorMsg: String?, _ data: FIRUser?) -> Void
+typealias DeletionCompletion = () -> ()
 
 class AuthenticationService {
     
@@ -58,6 +59,14 @@ class AuthenticationService {
         } catch {
             onCompletion?("There was an error while logging you out. Please try again.", nil)
         }
+    }
+    
+    func deleteCurrentUser(onCompletion: DeletionCompletion?) {
+        let user = FIRAuth.auth()?.currentUser
+        
+        user?.delete(completion: { _ in
+            onCompletion?()
+        })
     }
     
     fileprivate func processFirebaseErrors(error: NSError, onComplete: UserCompletion?) {
