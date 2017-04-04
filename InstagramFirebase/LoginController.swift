@@ -8,7 +8,7 @@
 
 import UIKit
 
-class LoginController: UIViewController {
+class LoginController: UIViewController, Alerter {
     
     fileprivate let signUpButtonHeight: CGFloat = 50
     fileprivate static let logoImageViewWidth: CGFloat = 200
@@ -31,42 +31,41 @@ class LoginController: UIViewController {
         return view
     }()
 
-    let emailTextField: UITextField = {
+    lazy var emailTextField: UITextField = { [weak self] in
+        guard let this = self else { return UITextField() }
         let tf = UITextField()
         tf.placeholder = "Email"
         tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
         tf.borderStyle = .roundedRect
         tf.font = UIFont.systemFont(ofSize: 14)
-        
-        //tf.addTarget(self, action: #selector(handleTextInputChange), for: .editingChanged)
+        tf.keyboardType = .emailAddress
+        tf.addTarget(this, action: #selector(handleTextInputChange), for: .editingChanged)
         
         return tf
     }()
     
-    let passwordTextField: UITextField = {
+    lazy var passwordTextField: UITextField = { [weak self] in
+        guard let this = self else { return UITextField() }
         let tf = UITextField()
         tf.placeholder = "Password"
         tf.isSecureTextEntry = true
         tf.backgroundColor = UIColor(white: 0, alpha: 0.03)
         tf.borderStyle = .roundedRect
         tf.font = UIFont.systemFont(ofSize: 14)
-        //tf.addTarget(self, action: #selector(handleTextInputChange), for: .editingChanged)
+        tf.addTarget(this, action: #selector(handleTextInputChange), for: .editingChanged)
         return tf
     }()
     
-    let loginButton: UIButton = {
+    lazy var loginButton: UIButton = { [weak self] in
+        guard let this = self else { return UIButton() }
         let button = UIButton(type: .system)
         button.setTitle("Login", for: .normal)
         button.backgroundColor = buttonInactiveColor
-        
         button.layer.cornerRadius = 5
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 14)
         button.setTitleColor(.white, for: .normal)
-        
-        //button.addTarget(self, action: #selector(handleSignUp), for: .touchUpInside)
-        
+        button.addTarget(this, action: #selector(handleLogin), for: .touchUpInside)
         button.isEnabled = false
-        
         return button
     }()
     
@@ -121,8 +120,37 @@ class LoginController: UIViewController {
 }
 
 extension LoginController {
+    
+    func handleLogin() {
+        guard let email = emailTextField.text, let password = passwordTextField.text else { return }
+        if email.characters.count < 1 || password.characters.count < 1 { return }
+        
+        AuthenticationService.shared.signIn(email: email, password: password) { [weak self] (error, user) in
+            guard let this = self else { return }
+        
+            if let error = error {
+                this.present(this.alertVC(title: "An error has occurred", message: error), animated: true, completion: nil)
+                return
+            }
+            
+            guard let customTabBarController = UIApplication.shared.keyWindow?.rootViewController as? CustomTabBarController else { return }
+            
+            customTabBarController.setupViewControllers()
+            
+            this.dismiss(animated: true, completion: nil)
+        }
+
+    }
+    
     func handleShowSignUp() {
         let signUpController = SignUpController()
         navigationController?.pushViewController(signUpController, animated: true)
     }
+    
+    func handleTextInputChange() {
+        let isFormValid = emailTextField.text?.characters.count ?? 0 > 0 && passwordTextField.text?.characters.count ?? 0 > 0
+        loginButton.backgroundColor = isFormValid ? LoginController.buttonActiveColor : LoginController.buttonInactiveColor
+        loginButton.isEnabled = isFormValid ? true : false
+    }
+
 }

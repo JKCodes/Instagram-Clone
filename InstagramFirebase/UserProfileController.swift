@@ -92,13 +92,17 @@ extension UserProfileController {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
         alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { (_) in
-            AuthenticationService.shared.signout(onCompletion: { [weak self] (error, _) in
+            AuthenticationService.shared.signOut(onCompletion: { [weak self] (error, _) in
                 guard let this = self else { return }
                 
                 if let error = error {
                     this.present(this.alertVC(title: "Error signing out", message: error), animated: true, completion: nil)
                     return
                 }
+                
+                let loginController = LoginController()
+                let navController = UINavigationController(rootViewController: loginController)
+                this.present(navController, animated: true, completion: nil)
                 
             })
         }))

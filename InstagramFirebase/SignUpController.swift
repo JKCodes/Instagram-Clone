@@ -181,7 +181,7 @@ extension SignUpController {
                     
                     DatabaseService.shared.saveData(uid: uid, type: .user, data: dictionaryValues, onComplete: { [weak self] (error, _) in
                         if let error = error {
-                            this.present(this.alertVC(title: "Error saving to data", message: error), animated: true, completion: nil)
+                            this.present(this.alertVC(title: "Error saving data", message: error), animated: true, completion: nil)
                             return
                         }
                         
@@ -192,9 +192,15 @@ extension SignUpController {
                             guard let this = self else { return }
                             
                             if let error = error {
-                                this.present(this.alertVC(title: "Error saving to data", message: error), animated: true, completion: nil)
+                                this.present(this.alertVC(title: "Error saving data", message: error), animated: true, completion: nil)
                                 return
                             }
+                            
+                            guard let customTabBarController = UIApplication.shared.keyWindow?.rootViewController as? CustomTabBarController else { return }
+                            
+                            customTabBarController.setupViewControllers()
+                            
+                            this.dismiss(animated: true, completion: nil)
                         })
                         
                     })

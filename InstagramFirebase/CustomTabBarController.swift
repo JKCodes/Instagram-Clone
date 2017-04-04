@@ -22,6 +22,10 @@ class CustomTabBarController: UITabBarController {
             return
         }
         
+        setupViewControllers()
+    }
+    
+    func setupViewControllers() {
         let layout = UICollectionViewFlowLayout()
         let userProfileVC = UserProfileController(collectionViewLayout: layout)
         userProfileVC.navigationItem.title = "Temp"

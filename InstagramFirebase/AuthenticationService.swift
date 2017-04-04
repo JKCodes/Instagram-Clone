@@ -42,7 +42,7 @@ class AuthenticationService {
     }
  
     
-    func signin(email: String, password: String, onComplete: UserCompletion?) {
+    func signIn(email: String, password: String, onComplete: UserCompletion?) {
         FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { [weak self] (user, error) in
             if let error = error {
                 self?.processFirebaseErrors(error: error as NSError, onComplete: onComplete)
@@ -52,7 +52,7 @@ class AuthenticationService {
         })
     }
     
-    func signout(onCompletion: UserCompletion?) {
+    func signOut(onCompletion: UserCompletion?) {
         do {
             try FIRAuth.auth()?.signOut()
             onCompletion?(nil, nil)
