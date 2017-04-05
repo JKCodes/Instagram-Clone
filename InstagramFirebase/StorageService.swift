@@ -12,8 +12,8 @@ import FirebaseStorage
 typealias StorageMetadataCompletion = (_ errorMsg: String?, _ metadata: FIRStorageMetadata?) -> Void
 
 fileprivate let FIR_CHILD_PROFILEIMG = "profile_images"
-fileprivate let FIR_CHILD_IMAGE = "message_images"
-fileprivate let FIR_CHILD_VIDEO = "message_videos"
+fileprivate let FIR_CHILD_IMAGE = "images"
+fileprivate let FIR_CHILD_VIDEO = "videos"
 
 enum StorageTypes {
     case profile

@@ -17,11 +17,13 @@ fileprivate let FIR_CHILD_USERNAMES = "usernames"
 fileprivate let FIR_CHILD_PROFILE = "profile"
 fileprivate let FIR_CHILD_MESSAGES = "messages"
 fileprivate let FIR_CHILD_USER_MESSAGES = "user-messages"
+fileprivate let FIR_CHILD_POSTS = "posts"
 
 enum DataTypes {
     case user
     case username
     case message
+    case post
     case userMessages
 }
 
@@ -53,15 +55,31 @@ class DatabaseService {
         return rootRef.child(FIR_CHILD_USER_MESSAGES)
     }
     
+    var postsRef: FIRDatabaseReference {
+        return rootRef.child(FIR_CHILD_POSTS)
+    }
+    
+    func isUsernameUnique(username: String, onComplete: @escaping (_ flag: Bool) -> Void) {
+        usernamesRef.observeSingleEvent(of: .value, with: { (snapshot) in
+            if snapshot.hasChild(username) {
+                onComplete(false)
+            } else {
+                onComplete(true)
+            }
+        }, withCancel: nil)
+    }
+    
     func saveData(uid: String?, type: DataTypes, data: Dictionary<String, AnyObject>, fan: Bool = false, onComplete: DatabaseReferenceCompletion?) {
-        if uid == nil && type == .user { fatalError("uid is required if a user is to be saved") }
+        guard let currentId = AuthenticationService.shared.currentId() else { fatalError("This app requires users to be logged in before saving any data") }
         
+        let id = uid ?? currentId
         let uniqueRef: FIRDatabaseReference
         
         switch type {
         case .message, .userMessages: uniqueRef = messagesRef.childByAutoId()
-        case .user: uniqueRef = usersRef.child(uid!)
+        case .user: uniqueRef = usersRef.child(id)
         case .username: uniqueRef = usernamesRef
+        case .post: uniqueRef = postsRef.child(id).childByAutoId()
         }
         
         uniqueRef.updateChildValues(data) { [weak self] (error, ref) in
@@ -75,16 +93,6 @@ class DatabaseService {
                 onComplete?(nil, ref)
             }
         }
-    }
-    
-    func isUsernameUnique(username: String, onComplete: @escaping (_ flag: Bool) -> Void) {
-        usernamesRef.observeSingleEvent(of: .value, with: { (snapshot) in
-            if snapshot.hasChild(username) {
-                onComplete(false)
-            } else {
-                onComplete(true)
-            }
-        }, withCancel: nil)
     }
     
     fileprivate func saveFanData(childRef: FIRDatabaseReference, data: Dictionary<String, AnyObject>, onComplete: DatabaseReferenceCompletion?) {
@@ -120,6 +128,7 @@ class DatabaseService {
         case .user: ref = usersRef.child(queryString)
         case .message: ref = messagesRef.child(queryString)
         case .username: ref = usernamesRef.child(queryString)
+        case .post: ref = postsRef.child(queryString)
         case .userMessages: ref = userMessagesRef.child(currentId).child(queryString)
         }
         
@@ -195,6 +204,7 @@ class DatabaseService {
         case .message: ref = messagesRef
         case .username: ref = usernamesRef
         case .userMessages: ref = userMessagesRef
+        case .post: ref = postsRef
         }
         
         if type == .userMessages {

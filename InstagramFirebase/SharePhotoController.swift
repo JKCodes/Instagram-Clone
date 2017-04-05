@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SharePhotoController: UIViewController {
+class SharePhotoController: UIViewController, Alerter {
     
     fileprivate let contentOffset: CGFloat = 8
     fileprivate let containerViewHeight: CGFloat = 100
@@ -59,6 +59,22 @@ class SharePhotoController: UIViewController {
         textView.anchor(top: containerView.topAnchor, left: imageView.rightAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor, topConstant: 0, leftConstant: contentOffset / 2, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 0)
     }
     
+    fileprivate func saveToDatabase(imageUrl: String) {
+        guard let caption = textView.text, let postImage = selectedImage else { return }
+        
+        let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": Date().timeIntervalSince1970] as [String: AnyObject]
+
+        DatabaseService.shared.saveData(uid: nil, type: .post, data: values) { [weak self] (error, _) in
+            guard let this = self else { return }
+            if let error = error {
+                this.navigationItem.rightBarButtonItem?.isEnabled = true
+                this.present(this.alertVC(title: "Error saving data", message: error), animated: true, completion: nil)
+            }
+            
+            this.dismiss(animated: true, completion: nil)
+        }
+    }
+    
     override var prefersStatusBarHidden: Bool {
         return true
     }
@@ -66,6 +82,25 @@ class SharePhotoController: UIViewController {
 
 extension SharePhotoController {
     func handleShare() {
+        guard let image = selectedImage, let uploadData = UIImageJPEGRepresentation(image, 0.3), let caption = textView.text else { return }
+        if caption.characters.count < 1 {
+            present(alertVC(title: "Caption is empty", message: "Please enter some text for your image"), animated: true, completion: nil)
+            return
+        }
         
+        navigationItem.rightBarButtonItem?.isEnabled = false
+        
+        StorageService.shared.uploadToStorage(type: .image, data: uploadData, url: nil) { [weak self] (error, metadata) in
+            guard let this = self else { return }
+            if let error = error {
+                this.navigationItem.rightBarButtonItem?.isEnabled = true
+                this.present(this.alertVC(title: "Error saving data", message: error), animated: true, completion: nil)
+            }
+            
+            guard let imageUrl = metadata?.downloadURL()?.absoluteString else { return }
+            
+            this.saveToDatabase(imageUrl: imageUrl)
+            
+        }
     }
 }
