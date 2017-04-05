@@ -15,6 +15,7 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     fileprivate let headerHeight: CGFloat = 200
     
     var user: User?
+    var posts = [Post]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,9 +25,11 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
         fetchUser()
         
         collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerId)
-        collectionView?.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView?.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
         
         setupLogOutButton()
+        
+        fetchPosts()
     }
     
     fileprivate func fetchUser() {
@@ -43,6 +46,24 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
             
             this.collectionView?.reloadData()
         }
+    }
+    
+    fileprivate func fetchPosts() {
+        guard let uid = AuthenticationService.shared.currentId() else { return }
+        
+        DatabaseService.shared.retrieveSingleObject(queryString: uid, type: .post) { [weak self] (snapshot) in
+            guard let this = self, let dictionaries = snapshot?.value as? [String: Any] else { return }
+            
+            dictionaries.forEach({ (key, value) in
+                guard let dictionary = value as? [String: Any] else { return }
+
+                let post = Post(dictionary: dictionary)
+                this.posts.append(post)
+            })
+            
+            this.collectionView?.reloadData()
+        }
+        
     }
     
     fileprivate func setupLogOutButton() {
@@ -63,7 +84,7 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 7
+        return posts.count
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -80,9 +101,9 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath)
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! UserProfilePhotoCell
         
-        cell.backgroundColor = .blue
+        cell.post = posts[indexPath.item]
         
         return cell
     }
