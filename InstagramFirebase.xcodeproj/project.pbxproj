@@ -19,6 +19,7 @@
 		D83EF5B51E9310EA0062380E /* UIView + Anchors.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5AD1E9310EA0062380E /* UIView + Anchors.swift */; };
 		D848E6331E94E7BC00BD984F /* PhotoSelectorCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D848E6321E94E7BC00BD984F /* PhotoSelectorCell.swift */; };
 		D848E6351E9519CC00BD984F /* PhotoSelectorHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D848E6341E9519CC00BD984F /* PhotoSelectorHeader.swift */; };
+		D848E6371E9522DE00BD984F /* SharePhotoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D848E6361E9522DE00BD984F /* SharePhotoController.swift */; };
 		D86DBD2D1E940E8300F2E46F /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86DBD2C1E940E8300F2E46F /* LoginController.swift */; };
 		D86DBD301E94341900F2E46F /* PhotoSelectorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86DBD2F1E94341900F2E46F /* PhotoSelectorController.swift */; };
 		D87AA1AB1E93AAD900E3E3B6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D87AA1AA1E93AAD900E3E3B6 /* GoogleService-Info.plist */; };
@@ -48,6 +49,7 @@
 		D83EF5AD1E9310EA0062380E /* UIView + Anchors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView + Anchors.swift"; sourceTree = "<group>"; };
 		D848E6321E94E7BC00BD984F /* PhotoSelectorCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorCell.swift; sourceTree = "<group>"; };
 		D848E6341E9519CC00BD984F /* PhotoSelectorHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorHeader.swift; sourceTree = "<group>"; };
+		D848E6361E9522DE00BD984F /* SharePhotoController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharePhotoController.swift; sourceTree = "<group>"; };
 		D86DBD2C1E940E8300F2E46F /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 		D86DBD2F1E94341900F2E46F /* PhotoSelectorController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoSelectorController.swift; sourceTree = "<group>"; };
 		D87AA1AA1E93AAD900E3E3B6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 				D86DBD2F1E94341900F2E46F /* PhotoSelectorController.swift */,
 				D848E6321E94E7BC00BD984F /* PhotoSelectorCell.swift */,
 				D848E6341E9519CC00BD984F /* PhotoSelectorHeader.swift */,
+				D848E6361E9522DE00BD984F /* SharePhotoController.swift */,
 			);
 			name = AddPhoto;
 			sourceTree = "<group>";
@@ -321,6 +324,7 @@
 				D87AA1B31E93AC2100E3E3B6 /* StorageService.swift in Sources */,
 				D83EF5951E9310310062380E /* AppDelegate.swift in Sources */,
 				D848E6351E9519CC00BD984F /* PhotoSelectorHeader.swift in Sources */,
+				D848E6371E9522DE00BD984F /* SharePhotoController.swift in Sources */,
 				D83EF5AE1E9310EA0062380E /* Alerter.swift in Sources */,
 				D86DBD2D1E940E8300F2E46F /* LoginController.swift in Sources */,
 				D87AA1B01E93AC2100E3E3B6 /* AuthenticationService.swift in Sources */,

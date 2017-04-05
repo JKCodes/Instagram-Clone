@@ -13,13 +13,14 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
     
     fileprivate let cellId = "cellId"
     fileprivate let headerId = "headerId"
-    fileprivate let photoFetchLimit = 10
+    fileprivate let photoFetchLimit = 30
     fileprivate let photoTargetSizeLengthSmall: CGFloat = 200
     fileprivate let photoTargetSizeLengthLarge: CGFloat = 720
 
     var assets = [PHAsset]()
     var images = [UIImage]()
     var selectedImage: UIImage?
+    var header: PhotoSelectorHeader?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -97,6 +98,9 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         selectedImage = images[indexPath.item]
         collectionView.reloadData()
+        
+        let indexPath = IndexPath(item: 0, section: 0)
+        collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -115,6 +119,8 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath) as! PhotoSelectorHeader
 
+        self.header = header
+        
         header.photoImageView.image = selectedImage
 
         guard let selectedImage = selectedImage, let index = images.index(of: selectedImage) else { return header }
@@ -150,6 +156,8 @@ extension PhotoSelectorController {
     }
     
     func handleNext() {
-        
+        let sharePhotoController = SharePhotoController()
+        sharePhotoController.selectedImage = header?.photoImageView.image
+        navigationController?.pushViewController(sharePhotoController, animated: true)
     }
 }
