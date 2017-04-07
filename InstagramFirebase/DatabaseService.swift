@@ -9,7 +9,7 @@
 import Foundation
 import FirebaseDatabase
 
-typealias DataSnapshotCompletion = (_ metadata: FIRDataSnapshot?) -> Void
+typealias DataSnapshotCompletion = (_ metadata: FIRDataSnapshot) -> Void
 typealias DatabaseReferenceCompletion = (_ errorMsg: String?, _ ref: FIRDatabaseReference?) -> Void
 
 fileprivate let FIR_CHILD_USERS = "users"
@@ -119,7 +119,7 @@ class DatabaseService {
     }
     
     /// For simple retrieval such as a single message or a user
-    func retrieveSingleObject(queryString: String, type: DataTypes, onComplete: DataSnapshotCompletion?) {
+    func retrieveOnce(queryString: String, type: DataTypes, eventType: FIRDataEventType = .value, sortBy: String = "", onComplete: DataSnapshotCompletion?) {
         guard let currentId = AuthenticationService.shared.currentId() else { return }
         
         let ref: FIRDatabaseReference
@@ -132,15 +132,23 @@ class DatabaseService {
         case .userMessages: ref = userMessagesRef.child(currentId).child(queryString)
         }
         
-        ref.observeSingleEvent(of: .value, with: { (snapshot) in
-            
-            onComplete?(snapshot)
-            
-        }, withCancel: nil)
+        if sortBy == "" {
+            ref.observeSingleEvent(of: eventType, with: { (snapshot) in
+                
+                onComplete?(snapshot)
+                
+            }, withCancel: nil)
+        } else {
+            ref.queryOrdered(byChild: sortBy).observeSingleEvent(of: eventType, with: { (snapshot) in
+                
+                onComplete?(snapshot)
+                
+            }, withCancel: nil)
+        }
     }
     
     /// For complex retrievals such as user-messages (one or two level search) and a retrieval of group of users or messages (one level search)
-    func retrieveMultiple(type: DataTypes, eventType: FIRDataEventType, fromId: String?, toId: String?, propagate: Bool?, onComplete: DataSnapshotCompletion?) {
+    func retrieve(type: DataTypes, eventType: FIRDataEventType, fromId: String?, toId: String?, propagate: Bool?, sortBy: String = "", onComplete: DataSnapshotCompletion?) {
         let from = fromId ?? ""
         let to = toId ?? ""
         var prop = propagate ?? true  // if the propagation is set to false, one level searching will be used
@@ -153,28 +161,43 @@ class DatabaseService {
         guard let ref = getRef(type: type, fromId: from, toId: to) else { return }
         
         if type == .userMessages && prop {
-            retrieveFanObjectsForUnknownToId(childRef: ref, eventType: eventType, onComplete: onComplete)
+            retrieveFanObjectsForUnknownToId(childRef: ref, eventType: eventType, sortBy: sortBy, onComplete: onComplete)
         } else {
-            ref.observe(eventType, with: { (snapshot) in
-                onComplete?(snapshot)
-            }, withCancel: nil)
+            if sortBy == "" {
+                ref.observe(eventType, with: { (snapshot) in
+                    onComplete?(snapshot)
+                }, withCancel: nil)
+            } else {
+                ref.queryOrdered(byChild: sortBy).observe(eventType, with: { (snapshot) in
+                    onComplete?(snapshot)
+                }, withCancel: nil)
+            }
         }
     }
     
     // For unknown toId
-    fileprivate func retrieveFanObjectsForUnknownToId(childRef: FIRDatabaseReference, eventType: FIRDataEventType, onComplete: DataSnapshotCompletion?) {
-        childRef.observe(.childAdded, with: { (snapshot) in
-            let typeId = snapshot.key
-            
-            childRef.child(typeId).observe(eventType, with: { (snapshot) in
-                onComplete?(snapshot)
+    fileprivate func retrieveFanObjectsForUnknownToId(childRef: FIRDatabaseReference, eventType: FIRDataEventType, sortBy: String, onComplete: DataSnapshotCompletion?) {
+        if sortBy == "" {
+            childRef.observe(.childAdded, with: { (snapshot) in
+                let typeId = snapshot.key
+                
+                childRef.child(typeId).observe(eventType, with: { (snapshot) in
+                    onComplete?(snapshot)
+                }, withCancel: nil)
             }, withCancel: nil)
-        }, withCancel: nil)
-        
+        } else {
+            childRef.queryOrdered(byChild: sortBy).observe(.childAdded, with: { (snapshot) in
+                let typeId = snapshot.key
+                
+                childRef.child(typeId).queryOrdered(byChild: sortBy).observe(eventType, with: { (snapshot) in
+                    onComplete?(snapshot)
+                }, withCancel: nil)
+            }, withCancel: nil)
+        }
     }
     
     /// For complex removals such as user-message groups
-    func removeMultiple(type: DataTypes, fromId: String?, toId: String?, onComplete: DatabaseReferenceCompletion?) {
+    func remove(type: DataTypes, fromId: String?, toId: String?, onComplete: DatabaseReferenceCompletion?) {
         let from = fromId ?? ""
         let to = toId ?? ""
         
@@ -207,17 +230,14 @@ class DatabaseService {
         case .post: ref = postsRef
         }
         
-        if type == .userMessages {
-            if toId != "" {
-                return ref.child(currentId).child(toId)
-            } else {
-                return ref.child(currentId)
-            }
+        if fromId != "" && toId != "" {
+            return ref.child(currentId).child(toId)
+        } else if fromId != "" {
+            return ref.child(currentId)
         } else {
             return ref
         }
     }
-    
 }
 
 

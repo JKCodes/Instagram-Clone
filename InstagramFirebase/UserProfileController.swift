@@ -29,16 +29,16 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
         
         setupLogOutButton()
         
-        fetchPosts()
+        fetchOrderedPosts()
     }
     
     fileprivate func fetchUser() {
         guard let uid = AuthenticationService.shared.currentId() else { return }
         
-        DatabaseService.shared.retrieveSingleObject(queryString: uid, type: .user) { [weak self] (snapshot) in
+        DatabaseService.shared.retrieveOnce(queryString: uid, type: .user, eventType: .value) { [weak self] (snapshot) in
             guard let this = self else { return }
             
-            guard let dictionary = snapshot?.value as? [String: Any] else { return }
+            guard let dictionary = snapshot.value as? [String: Any] else { return }
             
             this.user = User(dictionary: dictionary)
             
@@ -48,22 +48,19 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
         }
     }
     
-    fileprivate func fetchPosts() {
+    fileprivate func fetchOrderedPosts() {
         guard let uid = AuthenticationService.shared.currentId() else { return }
-        
-        DatabaseService.shared.retrieveSingleObject(queryString: uid, type: .post) { [weak self] (snapshot) in
-            guard let this = self, let dictionaries = snapshot?.value as? [String: Any] else { return }
-            
-            dictionaries.forEach({ (key, value) in
-                guard let dictionary = value as? [String: Any] else { return }
 
-                let post = Post(dictionary: dictionary)
-                this.posts.append(post)
-            })
+        DatabaseService.shared.retrieve(type: .post, eventType: .childAdded, fromId: uid, toId: nil, propagate: false) { [weak self] (snapshot) in
+            
+            guard let this = self, let dictionary = snapshot.value as? [String: Any] else { return }
+            
+            let post = Post(dictionary: dictionary)
+            this.posts.append(post)
             
             this.collectionView?.reloadData()
+            
         }
-        
     }
     
     fileprivate func setupLogOutButton() {
