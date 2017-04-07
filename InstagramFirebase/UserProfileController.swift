@@ -51,7 +51,7 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     fileprivate func fetchOrderedPosts() {
         guard let uid = AuthenticationService.shared.currentId() else { return }
 
-        DatabaseService.shared.retrieve(type: .post, eventType: .childAdded, fromId: uid, toId: nil, propagate: false) { [weak self] (snapshot) in
+        DatabaseService.shared.retrieve(type: .post, eventType: .childAdded, fromId: uid, toId: nil, propagate: false, sortBy: "creationDate") { [weak self] (snapshot) in
             
             guard let this = self, let dictionary = snapshot.value as? [String: Any] else { return }
             
