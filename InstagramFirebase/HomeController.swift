@@ -11,7 +11,7 @@ import UIKit
 class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     
     fileprivate let cellId = "cellId"
-    fileprivate let cellHeight: CGFloat = 200
+    fileprivate var cellHeight: CGFloat = 0
     
     var posts = [Post]()
     
@@ -47,7 +47,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         }
         
     }
-
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return posts.count
@@ -62,6 +61,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        cellHeight = view.frame.width // height = width
+        cellHeight += HomePostCell.cellHeightMinusPhoto
+        
         return CGSize(width: view.frame.width, height: cellHeight)
     }
 }

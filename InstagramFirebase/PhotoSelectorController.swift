@@ -78,7 +78,6 @@ class PhotoSelectorController: UICollectionViewController, UICollectionViewDeleg
                         }
                     }
                 })
-                print(this.images)
             })
         }
     }
