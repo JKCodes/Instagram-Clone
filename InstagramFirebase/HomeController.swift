@@ -33,17 +33,23 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     fileprivate func fetchPosts() {
         guard let uid = AuthenticationService.shared.currentId() else { return }
         
-        DatabaseService.shared.retrieveOnce(queryString: uid, type: .post, eventType: .value) { [weak self] (snapshot) in
-            guard let this = self, let dictionaries = snapshot.value as? [String: Any] else { return }
+        DatabaseService.shared.retrieveOnce(queryString: uid, type: .user) { [weak self] (snapshot) in
+            guard let this = self, let userDictionary = snapshot.value as? [String: Any] else { return }
             
-            dictionaries.forEach({ (key, value) in
-                guard let dictionary = value as? [String: Any] else { return }
+            let user = User(dictionary: userDictionary)
+        
+            DatabaseService.shared.retrieveOnce(queryString: uid, type: .post, eventType: .value) { (snapshot) in
+                guard let dictionaries = snapshot.value as? [String: Any] else { return }
                 
-                let post = Post(dictionary: dictionary)
-                this.posts.append(post)
-            })
-            
-            this.collectionView?.reloadData()
+                dictionaries.forEach({ (key, value) in
+                    guard let dictionary = value as? [String: Any] else { return }
+                    
+                    let post = Post(user: user, dictionary: dictionary)
+                    this.posts.append(post)
+                })
+                
+                this.collectionView?.reloadData()
+            }
         }
         
     }

@@ -53,10 +53,11 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
 
         DatabaseService.shared.retrieve(type: .post, eventType: .childAdded, fromId: uid, toId: nil, propagate: false, sortBy: "creationDate") { [weak self] (snapshot) in
             
-            guard let this = self, let dictionary = snapshot.value as? [String: Any] else { return }
+            guard let this = self, let user = this.user, let dictionary = snapshot.value as? [String: Any] else { return }
             
-            let post = Post(dictionary: dictionary)
-            this.posts.append(post)
+            let post = Post(user: user, dictionary: dictionary)
+
+            this.posts.insert(post, at: 0)
             
             this.collectionView?.reloadData()
             

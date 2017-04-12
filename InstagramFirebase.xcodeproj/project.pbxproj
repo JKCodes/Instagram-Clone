@@ -135,6 +135,7 @@
 		D848E6381E9538A600BD984F /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				D87AA1BF1E93F10A00E3E3B6 /* User.swift */,
 				D848E6391E9538B900BD984F /* Post.swift */,
 			);
 			name = Model;
@@ -198,7 +199,6 @@
 			children = (
 				D87AA1B71E93E76100E3E3B6 /* UserProfileController.swift */,
 				D87AA1BA1E93EE7C00E3E3B6 /* UserProfileHeader.swift */,
-				D87AA1BF1E93F10A00E3E3B6 /* User.swift */,
 				D848E63B1E9539EF00BD984F /* UserProfilePhotoCell.swift */,
 			);
 			name = UserProfile;

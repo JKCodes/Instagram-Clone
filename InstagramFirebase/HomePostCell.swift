@@ -24,9 +24,13 @@ class HomePostCell: BaseCell {
     
     var post: Post? {
         didSet {
-            guard let urlString = post?.imageUrl else { return }
+            guard let urlString = post?.imageUrl, let profileImageUrl = post?.user.profileImageUrl else { return }
             
             photoImageView.loadImageUsingCache(urlString: urlString)
+            usernameLabel.text = post?.user.username
+            userProfileImageView.loadImageUsingCache(urlString: profileImageUrl)
+
+            setupAttributedCaption()
         }
     }
     
@@ -34,7 +38,6 @@ class HomePostCell: BaseCell {
         let iv = UIImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
-        iv.backgroundColor = .blue
         return iv
     }()
 
@@ -85,16 +88,6 @@ class HomePostCell: BaseCell {
     
     let captionLabel: UILabel = {
         let label = UILabel()
-        
-        let attributedText = NSMutableAttributedString(string: "Username", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
-        
-        attributedText.append(NSAttributedString(string: " Some caption text that will perhaps wrap onto the next line", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
-        
-        attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 4)]))
-        
-        attributedText.append(NSAttributedString(string: "1 week ago", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14), NSForegroundColorAttributeName: UIColor.gray]))
-        
-        label.attributedText = attributedText
         label.numberOfLines = 0
         return label
     }()
@@ -131,5 +124,19 @@ class HomePostCell: BaseCell {
 
         stackView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, topConstant: 0, leftConstant: contentOffset / 2, bottomConstant: 0, rightConstant: 0, widthConstant: stackViewWidth, heightConstant: stackViewHeight)
         bookmarkButton.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: bookmarkButtonWidth, heightConstant: bookmarkButtonHeight)
+    }
+    
+    fileprivate func setupAttributedCaption() {
+        guard let post = post else { return }
+        
+        let attributedText = NSMutableAttributedString(string: post.user.username, attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)])
+        
+        attributedText.append(NSAttributedString(string: " \(post.caption)", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
+        
+        attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 4)]))
+        
+        attributedText.append(NSAttributedString(string: "1 week ago", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14), NSForegroundColorAttributeName: UIColor.gray]))
+        
+        captionLabel.attributedText = attributedText
     }
 }
