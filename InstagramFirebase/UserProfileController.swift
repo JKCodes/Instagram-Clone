@@ -36,12 +36,9 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
         guard let uid = AuthenticationService.shared.currentId() else { return }
         
         DatabaseService.shared.retrieveOnce(queryString: uid, type: .user, eventType: .value) { [weak self] (snapshot) in
-            guard let this = self else { return }
-            
-            guard let dictionary = snapshot.value as? [String: Any] else { return }
-            
-            this.user = User(dictionary: dictionary)
-            
+            guard let this = self, let dictionary = snapshot.value as? [String: Any] else { return }
+                        
+            this.user = User(uid: uid, dictionary: dictionary)
             this.navigationItem.title = this.user?.username
             
             this.collectionView?.reloadData()

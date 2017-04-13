@@ -36,22 +36,27 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         DatabaseService.shared.retrieveOnce(queryString: uid, type: .user) { [weak self] (snapshot) in
             guard let this = self, let userDictionary = snapshot.value as? [String: Any] else { return }
             
-            let user = User(dictionary: userDictionary)
+            let user = User(uid: uid, dictionary: userDictionary)
         
-            DatabaseService.shared.retrieveOnce(queryString: uid, type: .post, eventType: .value) { (snapshot) in
-                guard let dictionaries = snapshot.value as? [String: Any] else { return }
-                
-                dictionaries.forEach({ (key, value) in
-                    guard let dictionary = value as? [String: Any] else { return }
-                    
-                    let post = Post(user: user, dictionary: dictionary)
-                    this.posts.append(post)
-                })
-                
-                this.collectionView?.reloadData()
-            }
+            this.fetchPostWithUser(user: user)
         }
         
+    }
+    
+    fileprivate func fetchPostWithUser(user: User) {
+        
+        DatabaseService.shared.retrieveOnce(queryString: user.uid, type: .post, eventType: .value) { [weak self] (snapshot) in
+            guard let this = self, let dictionaries = snapshot.value as? [String: Any] else { return }
+            
+            dictionaries.forEach({ (key, value) in
+                guard let dictionary = value as? [String: Any] else { return }
+                
+                let post = Post(user: user, dictionary: dictionary)
+                this.posts.append(post)
+            })
+            
+            this.collectionView?.reloadData()
+        }
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
