@@ -14,9 +14,18 @@ class UserSearchCell: BaseCell {
     fileprivate let profileImageHeight: CGFloat = 50
     fileprivate let separatorHeight: CGFloat = 0.5
     
+    var user: User? {
+        didSet {
+            usernameLabel.text = user?.username
+            
+            guard let profileImageUrl = user?.profileImageUrl else { return }
+            
+            profileImageView.loadImageUsingCache(urlString: profileImageUrl)
+        }
+    }
+    
     let profileImageView: UIImageView = {
         let iv = UIImageView()
-        iv.backgroundColor = .red
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
         return iv
