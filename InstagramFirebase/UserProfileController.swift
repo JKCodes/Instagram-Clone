@@ -14,6 +14,8 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     fileprivate let cellId = "cellId"
     fileprivate let headerHeight: CGFloat = 200
     
+    var userId: String?
+    
     var user: User?
     var posts = [Post]()
     
@@ -21,19 +23,17 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
         super.viewDidLoad()
         
         collectionView?.backgroundColor = .white
-        
-        fetchUser()
-        
         collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerId)
         collectionView?.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
         
         setupLogOutButton()
         
-        fetchOrderedPosts()
+        fetchUser()
     }
     
     fileprivate func fetchUser() {
-        guard let uid = AuthenticationService.shared.currentId() else { return }
+        
+        guard let uid = userId ?? AuthenticationService.shared.currentId() else { return }
         
         DatabaseService.shared.retrieveOnce(queryString: uid, type: .user, eventType: .value) { [weak self] (snapshot) in
             guard let this = self, let dictionary = snapshot.value as? [String: Any] else { return }
@@ -42,22 +42,26 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
             this.navigationItem.title = this.user?.username
             
             this.collectionView?.reloadData()
+            
+            this.fetchOrderedPosts()
         }
     }
     
     fileprivate func fetchOrderedPosts() {
-        guard let uid = AuthenticationService.shared.currentId() else { return }
+        guard let uid = self.user?.uid else { return }
 
         DatabaseService.shared.retrieve(type: .post, eventType: .childAdded, fromId: uid, toId: nil, propagate: false, sortBy: "creationDate") { [weak self] (snapshot) in
             
             guard let this = self, let user = this.user, let dictionary = snapshot.value as? [String: Any] else { return }
+            
+            print(dictionary)
             
             let post = Post(user: user, dictionary: dictionary)
 
             this.posts.insert(post, at: 0)
             
             this.collectionView?.reloadData()
-            
+
         }
     }
     

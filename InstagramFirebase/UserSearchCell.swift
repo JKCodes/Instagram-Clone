@@ -20,12 +20,12 @@ class UserSearchCell: BaseCell {
             
             guard let profileImageUrl = user?.profileImageUrl else { return }
             
-            profileImageView.loadImageUsingCache(urlString: profileImageUrl)
+            profileImageView.loadImage(urlString: profileImageUrl)
         }
     }
     
-    let profileImageView: UIImageView = {
-        let iv = UIImageView()
+    let profileImageView: CustomImageView = {
+        let iv = CustomImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
         return iv

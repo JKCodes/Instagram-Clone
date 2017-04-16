@@ -25,8 +25,8 @@ class UserProfileHeader: BaseCell {
         }
     }
     
-    let profileImageView: UIImageView = {
-        let iv = UIImageView()
+    let profileImageView: CustomImageView = {
+        let iv = CustomImageView()
         iv.clipsToBounds = true
         iv.layer.cornerRadius = profileImageRadius
         return iv
@@ -130,7 +130,7 @@ class UserProfileHeader: BaseCell {
     fileprivate func setupProfileImage() {
         guard let profileImageUrl = user?.profileImageUrl else { return }
         
-        profileImageView.loadImageUsingCache(urlString: profileImageUrl)
+        profileImageView.loadImage(urlString: profileImageUrl)
     }
     
     fileprivate func setupBottomToolBar() {

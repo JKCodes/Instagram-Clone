@@ -26,23 +26,22 @@ class HomePostCell: BaseCell {
         didSet {
             guard let urlString = post?.imageUrl, let profileImageUrl = post?.user.profileImageUrl else { return }
             
-            photoImageView.loadImageUsingCache(urlString: urlString)
+            photoImageView.loadImage(urlString: urlString)
             usernameLabel.text = post?.user.username
-            userProfileImageView.loadImageUsingCache(urlString: profileImageUrl)
-
+            userProfileImageView.loadImage(urlString: profileImageUrl)
             setupAttributedCaption()
         }
     }
     
-    let userProfileImageView: UIImageView = {
-        let iv = UIImageView()
+    let userProfileImageView: CustomImageView = {
+        let iv = CustomImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
         return iv
     }()
 
-    let photoImageView: UIImageView = {
-        let iv = UIImageView()
+    let photoImageView: CustomImageView = {
+        let iv = CustomImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
         return iv

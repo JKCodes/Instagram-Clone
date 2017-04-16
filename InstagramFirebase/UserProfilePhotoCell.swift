@@ -13,12 +13,12 @@ class UserProfilePhotoCell: BaseCell {
     var post: Post? {
         didSet {
             guard let urlString = post?.imageUrl else { return }
-            photoImageView.loadImageUsingCache(urlString: urlString)
+            photoImageView.loadImage(urlString: urlString)
         }
     }
     
-    let photoImageView: UIImageView = {
-        let iv = UIImageView()
+    let photoImageView: CustomImageView = {
+        let iv = CustomImageView()
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
         return iv
