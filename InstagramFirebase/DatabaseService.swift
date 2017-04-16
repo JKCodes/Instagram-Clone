@@ -119,17 +119,17 @@ class DatabaseService {
     }
     
     /// For simple retrieval such as a single message or a user
-    func retrieveOnce(queryString: String, type: DataTypes, eventType: FIRDataEventType = .value, sortBy: String = "", onComplete: DataSnapshotCompletion?) {
+    func retrieveOnce(queryString: String = "", type: DataTypes, eventType: FIRDataEventType = .value, sortBy: String = "", onComplete: DataSnapshotCompletion?) {
         guard let currentId = AuthenticationService.shared.currentId() else { return }
         
         let ref: FIRDatabaseReference
         
         switch type {
-        case .user: ref = usersRef.child(queryString)
-        case .message: ref = messagesRef.child(queryString)
-        case .username: ref = usernamesRef.child(queryString)
-        case .post: ref = postsRef.child(queryString)
-        case .userMessages: ref = userMessagesRef.child(currentId).child(queryString)
+        case .user: ref = queryString != "" ? usersRef.child(queryString) : usersRef
+        case .message: ref = queryString != "" ? messagesRef.child(queryString) : messagesRef
+        case .username: ref = queryString != "" ? usernamesRef.child(queryString) : usernamesRef
+        case .post: ref = queryString != "" ? postsRef.child(queryString) : postsRef
+        case .userMessages: ref = queryString != "" ? userMessagesRef.child(currentId).child(queryString) : userMessagesRef
         }
         
         if sortBy == "" {

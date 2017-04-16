@@ -49,22 +49,20 @@ class CustomTabBarController: UITabBarController, UITabBarControllerDelegate {
     func setupViewControllers() {
         
         // home
-        let homeController = createTemplateController(title: "Home", image: #imageLiteral(resourceName: "home_unselected"), selectedImage: #imageLiteral(resourceName: "home_selected"), rootViewController: HomeController(collectionViewLayout: UICollectionViewFlowLayout()))
+        let homeController = createTemplateController(unselectedImage: #imageLiteral(resourceName: "home_unselected"), selectedImage: #imageLiteral(resourceName: "home_selected"), rootViewController: HomeController(collectionViewLayout: UICollectionViewFlowLayout()))
         
-        let layout = UICollectionViewFlowLayout()
-        let userProfileVC = UserProfileController(collectionViewLayout: layout)
-        userProfileVC.navigationItem.title = "Temp"
-        let userProfileViewController = UINavigationController(rootViewController: userProfileVC)
-        userProfileViewController.tabBarItem.image = #imageLiteral(resourceName: "profile_unselected")
-        userProfileViewController.tabBarItem.selectedImage = #imageLiteral(resourceName: "profile_selected")
+        // search
+        let searchController = createTemplateController(unselectedImage: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected"), rootViewController: UserSearchController(collectionViewLayout: UICollectionViewFlowLayout()))
+        
+        // profile
+        let profileController = createTemplateController(unselectedImage: #imageLiteral(resourceName: "profile_unselected"), selectedImage: #imageLiteral(resourceName: "profile_selected"), rootViewController: UserProfileController(collectionViewLayout: UICollectionViewFlowLayout()))
         
         tabBar.tintColor = .black
         
-        viewControllers = [homeController,
-                           createTemplateController(title: "Search", image: #imageLiteral(resourceName: "search_unselected"), selectedImage: #imageLiteral(resourceName: "search_selected")),
-                           createTemplateController(title: "Add", image: #imageLiteral(resourceName: "plus_unselected"), selectedImage: #imageLiteral(resourceName: "plus_unselected")),
-                           createTemplateController(title: "Like", image: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected")),
-                           userProfileViewController]
+        viewControllers = [homeController, searchController,
+                           createTemplateController(unselectedImage: #imageLiteral(resourceName: "plus_unselected"), selectedImage: #imageLiteral(resourceName: "plus_unselected")),
+                           createTemplateController(unselectedImage: #imageLiteral(resourceName: "like_unselected"), selectedImage: #imageLiteral(resourceName: "like_selected")),
+                           profileController]
         
         guard let items = tabBar.items else { return }
         
@@ -73,12 +71,10 @@ class CustomTabBarController: UITabBarController, UITabBarControllerDelegate {
         }
     }
     
-    fileprivate func createTemplateController(title: String, image: UIImage, selectedImage: UIImage, rootViewController: UIViewController = UIViewController()) -> UINavigationController {
+    fileprivate func createTemplateController(unselectedImage: UIImage, selectedImage: UIImage, rootViewController: UIViewController = UIViewController()) -> UINavigationController {
         let viewController = rootViewController
-        viewController.navigationItem.title = title
-        viewController.view.backgroundColor = .white
         let navController = UINavigationController(rootViewController: viewController)
-        navController.tabBarItem.image = image
+        navController.tabBarItem.image = unselectedImage
         navController.tabBarItem.selectedImage = selectedImage
         return navController
     }
