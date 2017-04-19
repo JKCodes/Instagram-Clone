@@ -8,7 +8,7 @@
 
 import UIKit
 
-class LoginController: UIViewController, Alerter {
+class LoginController: UIViewController, UITextFieldDelegate, Alerter {
     
     fileprivate let signUpButtonHeight: CGFloat = 50
     fileprivate static let logoImageViewWidth: CGFloat = 200
@@ -40,7 +40,7 @@ class LoginController: UIViewController, Alerter {
         tf.font = UIFont.systemFont(ofSize: 14)
         tf.keyboardType = .emailAddress
         tf.addTarget(this, action: #selector(handleTextInputChange), for: .editingChanged)
-        
+        tf.delegate = this
         return tf
     }()
     
@@ -53,6 +53,7 @@ class LoginController: UIViewController, Alerter {
         tf.borderStyle = .roundedRect
         tf.font = UIFont.systemFont(ofSize: 14)
         tf.addTarget(this, action: #selector(handleTextInputChange), for: .editingChanged)
+        tf.delegate = this
         return tf
     }()
     
@@ -95,7 +96,6 @@ class LoginController: UIViewController, Alerter {
         navigationController?.isNavigationBarHidden = true
         
         view.backgroundColor = .white
-        
         view.addSubview(dontHaveAccountButton)
         
         dontHaveAccountButton.anchor(top: nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: signUpButtonHeight)
@@ -151,6 +151,15 @@ extension LoginController {
         let isFormValid = emailTextField.text?.characters.count ?? 0 > 0 && passwordTextField.text?.characters.count ?? 0 > 0
         loginButton.backgroundColor = isFormValid ? LoginController.buttonActiveColor : LoginController.buttonInactiveColor
         loginButton.isEnabled = isFormValid ? true : false
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        handleLogin()
+        return true
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
     }
 
 }

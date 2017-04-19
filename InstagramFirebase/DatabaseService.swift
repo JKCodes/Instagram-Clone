@@ -18,13 +18,15 @@ fileprivate let FIR_CHILD_PROFILE = "profile"
 fileprivate let FIR_CHILD_MESSAGES = "messages"
 fileprivate let FIR_CHILD_USER_MESSAGES = "user-messages"
 fileprivate let FIR_CHILD_POSTS = "posts"
+fileprivate let FIR_CHILD_FOLLOWING = "following"
 
-enum DataTypes {
+enum DataTypes: String {
     case user
     case username
     case message
     case post
     case userMessages
+    case following
 }
 
 
@@ -59,6 +61,10 @@ class DatabaseService {
         return rootRef.child(FIR_CHILD_POSTS)
     }
     
+    var followingRef: FIRDatabaseReference {
+        return rootRef.child(FIR_CHILD_FOLLOWING)
+    }
+    
     func isUsernameUnique(username: String, onComplete: @escaping (_ flag: Bool) -> Void) {
         usernamesRef.observeSingleEvent(of: .value, with: { (snapshot) in
             if snapshot.hasChild(username) {
@@ -69,37 +75,31 @@ class DatabaseService {
         }, withCancel: nil)
     }
     
-    func saveData(uid: String?, type: DataTypes, data: Dictionary<String, AnyObject>, fan: Bool = false, onComplete: DatabaseReferenceCompletion?) {
-        guard let currentId = AuthenticationService.shared.currentId() else { fatalError("This app requires users to be logged in before saving any data") }
+    func saveData(type: DataTypes, data: Dictionary<String, AnyObject>, firstChild: String?, secondChild: String?, appendAutoId: Bool, fan: Bool = false, onComplete: DatabaseReferenceCompletion?) {
+        guard var ref = getRef(type: type, firstChild: firstChild, secondChild: secondChild, fan: fan) else { return }
         
-        let id = uid ?? currentId
-        let uniqueRef: FIRDatabaseReference
-        
-        switch type {
-        case .message, .userMessages: uniqueRef = messagesRef.childByAutoId()
-        case .user: uniqueRef = usersRef.child(id)
-        case .username: uniqueRef = usernamesRef
-        case .post: uniqueRef = postsRef.child(id).childByAutoId()
+        if appendAutoId {
+            ref = ref.childByAutoId()
         }
         
-        uniqueRef.updateChildValues(data) { [weak self] (error, ref) in
+        ref.updateChildValues(data) { [weak self] (error, ref) in
             if error != nil {
                 onComplete?("Error saving data to the database", nil)
             }
     
             if fan {
-                self?.saveFanData(childRef: uniqueRef, data: data, onComplete: onComplete)
+                self?.saveFanData(childRef: ref, firstChild: firstChild, secondChild: secondChild, onComplete: onComplete)
             } else {
                 onComplete?(nil, ref)
             }
         }
     }
     
-    fileprivate func saveFanData(childRef: FIRDatabaseReference, data: Dictionary<String, AnyObject>, onComplete: DatabaseReferenceCompletion?) {
-        guard let fromId = data["fromId"] as? String, let toId = data["toId"] as? String else { return }
+    fileprivate func saveFanData(childRef: FIRDatabaseReference, firstChild: String?, secondChild: String?, onComplete: DatabaseReferenceCompletion?) {
+        guard let first = firstChild, let second = secondChild else { return }
         
-        let senderRef = userMessagesRef.child(fromId).child(toId)
-        let receiverRef = userMessagesRef.child(toId).child(fromId)
+        let senderRef = childRef.child(first).child(second)
+        let receiverRef = childRef.child(second).child(first)
         
         let typeId = childRef.key
         
@@ -119,56 +119,50 @@ class DatabaseService {
     }
     
     /// For simple retrieval such as a single message or a user
-    func retrieveOnce(queryString: String = "", type: DataTypes, eventType: FIRDataEventType = .value, sortBy: String = "", onComplete: DataSnapshotCompletion?) {
-        guard let currentId = AuthenticationService.shared.currentId() else { return }
+    func retrieveOnce(type: DataTypes, eventType: FIRDataEventType, firstChild: String?, secondChild: String?, propagate: Bool?, sortBy: String?, onComplete: DataSnapshotCompletion?) {
+        guard let ref = getRef(type: type, firstChild: firstChild, secondChild: secondChild) else { return }
         
-        let ref: FIRDatabaseReference
+        let sort = sortBy ?? ""
+        let prop = checkProp(propagate: propagate, secondChild: secondChild)
         
-        switch type {
-        case .user: ref = queryString != "" ? usersRef.child(queryString) : usersRef
-        case .message: ref = queryString != "" ? messagesRef.child(queryString) : messagesRef
-        case .username: ref = queryString != "" ? usernamesRef.child(queryString) : usernamesRef
-        case .post: ref = queryString != "" ? postsRef.child(queryString) : postsRef
-        case .userMessages: ref = queryString != "" ? userMessagesRef.child(currentId).child(queryString) : userMessagesRef
-        }
         
-        if sortBy == "" {
-            ref.observeSingleEvent(of: eventType, with: { (snapshot) in
-                
-                onComplete?(snapshot)
-                
-            }, withCancel: nil)
+        if prop {
+            retrieveFanObjects(childRef: ref, eventType: eventType, sortBy: sort, onComplete: onComplete)
         } else {
-            ref.queryOrdered(byChild: sortBy).observeSingleEvent(of: eventType, with: { (snapshot) in
-                
-                onComplete?(snapshot)
-                
-            }, withCancel: nil)
+            if sort == "" {
+                ref.observeSingleEvent(of: eventType, with: { (snapshot) in
+                    
+                    onComplete?(snapshot)
+                    
+                }, withCancel: nil)
+            } else {
+                ref.queryOrdered(byChild: sort).observeSingleEvent(of: eventType, with: { (snapshot) in
+                    
+                    onComplete?(snapshot)
+                    
+                }, withCancel: nil)
+            }
         }
     }
     
     /// For complex retrievals such as user-messages (one or two level search) and a retrieval of group of users or messages (one level search)
-    func retrieve(type: DataTypes, eventType: FIRDataEventType, fromId: String?, toId: String?, propagate: Bool?, sortBy: String = "", onComplete: DataSnapshotCompletion?) {
-        let from = fromId ?? ""
-        let to = toId ?? ""
-        var prop = propagate ?? true  // if the propagation is set to false, one level searching will be used
+    /// Propagation is used to retrieve second set of data after concluding the first set of data.
+    func retrieve(type: DataTypes, eventType: FIRDataEventType, firstChild: String?, secondChild: String?, propagate: Bool?, sortBy: String?, onComplete: DataSnapshotCompletion?) {
+        guard let ref = getRef(type: type, firstChild: firstChild, secondChild: secondChild) else { return }
         
-        // Propagation is overriden to false if toId is not nil, for toId automatically assumes a two level search
-        if to != "" {
-            prop = false
-        }
+        let sort = sortBy ?? ""
         
-        guard let ref = getRef(type: type, fromId: from, toId: to) else { return }
+        let prop = checkProp(propagate: propagate, secondChild: secondChild)
         
-        if type == .userMessages && prop {
-            retrieveFanObjectsForUnknownToId(childRef: ref, eventType: eventType, sortBy: sortBy, onComplete: onComplete)
+        if prop {
+            retrieveFanObjects(childRef: ref, eventType: eventType, sortBy: sort, onComplete: onComplete)
         } else {
-            if sortBy == "" {
+            if sort == "" {
                 ref.observe(eventType, with: { (snapshot) in
                     onComplete?(snapshot)
                 }, withCancel: nil)
             } else {
-                ref.queryOrdered(byChild: sortBy).observe(eventType, with: { (snapshot) in
+                ref.queryOrdered(byChild: sort).observe(eventType, with: { (snapshot) in
                     onComplete?(snapshot)
                 }, withCancel: nil)
             }
@@ -176,7 +170,7 @@ class DatabaseService {
     }
     
     // For unknown toId
-    fileprivate func retrieveFanObjectsForUnknownToId(childRef: FIRDatabaseReference, eventType: FIRDataEventType, sortBy: String, onComplete: DataSnapshotCompletion?) {
+    fileprivate func retrieveFanObjects(childRef: FIRDatabaseReference, eventType: FIRDataEventType, sortBy: String, onComplete: DataSnapshotCompletion?) {
         if sortBy == "" {
             childRef.observe(.childAdded, with: { (snapshot) in
                 let typeId = snapshot.key
@@ -197,11 +191,8 @@ class DatabaseService {
     }
     
     /// For complex removals such as user-message groups
-    func remove(type: DataTypes, fromId: String?, toId: String?, onComplete: DatabaseReferenceCompletion?) {
-        let from = fromId ?? ""
-        let to = toId ?? ""
-        
-        guard let ref = getRef(type: type, fromId: from, toId: to) else { return }
+    func remove(type: DataTypes, firstChild: String?, secondChild: String?, onComplete: DatabaseReferenceCompletion?) {
+        guard let ref = getRef(type: type, firstChild: firstChild, secondChild: secondChild) else { return }
         
         ref.removeValue { (error, ref) in
             if error != nil {
@@ -213,12 +204,9 @@ class DatabaseService {
     }
     
     // Used to get refs for retrievals and removals
-    fileprivate func getRef(type: DataTypes, fromId: String, toId: String) -> FIRDatabaseReference? {
-        guard var currentId = AuthenticationService.shared.currentId() else { return nil }
-        
-        if fromId != "" {
-            currentId = fromId
-        }
+    fileprivate func getRef(type: DataTypes, firstChild: String?, secondChild: String?, fan: Bool = false) -> FIRDatabaseReference? {
+        let first = firstChild ?? ""
+        let second = secondChild ?? ""
         
         var ref: FIRDatabaseReference
         
@@ -228,15 +216,27 @@ class DatabaseService {
         case .username: ref = usernamesRef
         case .userMessages: ref = userMessagesRef
         case .post: ref = postsRef
+        case .following: ref = followingRef
         }
         
-        if fromId != "" && toId != "" {
-            return ref.child(currentId).child(toId)
-        } else if fromId != "" {
-            return ref.child(currentId)
+        if fan {
+            return ref
+        }
+        
+        if first != "" && second != "" {
+            return ref.child(first).child(second)
+        } else if first != "" {
+            return ref.child(first)
         } else {
             return ref
         }
+    }
+    
+    fileprivate func checkProp(propagate: Bool?, secondChild: String?) -> Bool {
+        let prop = propagate ?? false
+        let second = secondChild ?? ""
+        
+        return second == "" ? prop : false
     }
 }
 

@@ -58,13 +58,14 @@ class UserSearchController: UICollectionViewController, UICollectionViewDelegate
     }
     
     fileprivate func fetchUsers() {
+        guard let uid = AuthenticationService.shared.currentId() else { return }
         
-        DatabaseService.shared.retrieveOnce(type: .user) { [weak self] (snapshot) in
+        DatabaseService.shared.retrieveOnce(type: .user, eventType: .value, firstChild: nil, secondChild: nil, propagate: nil, sortBy: nil) { [weak self] (snapshot) in
             guard let this = self, let dictionaries = snapshot.value as? [String: Any] else { return }
-            
+                        
             dictionaries.forEach({ (key, value) in
                 
-                if key == AuthenticationService.shared.currentId() {
+                if key == uid {
                     return
                 }
                 
@@ -81,6 +82,7 @@ class UserSearchController: UICollectionViewController, UICollectionViewDelegate
             })
             
             this.filteredUsers = this.users
+            print(this.users)
             this.collectionView?.reloadData()
         }
     }
@@ -96,7 +98,6 @@ class UserSearchController: UICollectionViewController, UICollectionViewDelegate
         searchBar.resignFirstResponder()
         
         let user = filteredUsers[indexPath.item]
-        print(user.username)
         
         let userProfileController = UserProfileController(collectionViewLayout: UICollectionViewFlowLayout())
         userProfileController.userId = user.uid

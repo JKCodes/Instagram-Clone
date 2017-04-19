@@ -35,7 +35,7 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
         
         guard let uid = userId ?? AuthenticationService.shared.currentId() else { return }
         
-        DatabaseService.shared.retrieveOnce(queryString: uid, type: .user, eventType: .value) { [weak self] (snapshot) in
+        DatabaseService.shared.retrieveOnce(type: .user, eventType: .value, firstChild: uid, secondChild: nil, propagate: nil, sortBy: nil) { [weak self] (snapshot) in
             guard let this = self, let dictionary = snapshot.value as? [String: Any] else { return }
                         
             this.user = User(uid: uid, dictionary: dictionary)
@@ -50,12 +50,9 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     fileprivate func fetchOrderedPosts() {
         guard let uid = self.user?.uid else { return }
 
-        DatabaseService.shared.retrieve(type: .post, eventType: .childAdded, fromId: uid, toId: nil, propagate: false, sortBy: "creationDate") { [weak self] (snapshot) in
-            
+        DatabaseService.shared.retrieve(type: .post, eventType: .childAdded, firstChild: uid, secondChild: nil, propagate: nil, sortBy: "creationDate") { [weak self] (snapshot) in
             guard let this = self, let user = this.user, let dictionary = snapshot.value as? [String: Any] else { return }
-            
-            print(dictionary)
-            
+                        
             let post = Post(user: user, dictionary: dictionary)
 
             this.posts.insert(post, at: 0)

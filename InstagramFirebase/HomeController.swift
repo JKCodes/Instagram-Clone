@@ -33,7 +33,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     fileprivate func fetchPosts() {
         guard let uid = AuthenticationService.shared.currentId() else { return }
         
-        DatabaseService.shared.retrieveOnce(queryString: uid, type: .user) { [weak self] (snapshot) in
+        DatabaseService.shared.retrieveOnce(type: .user, eventType: .value, firstChild: uid, secondChild: nil, propagate: nil, sortBy: nil) { [weak self] (snapshot) in
             guard let this = self, let userDictionary = snapshot.value as? [String: Any] else { return }
             
             let user = User(uid: uid, dictionary: userDictionary)
@@ -45,7 +45,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func fetchPostWithUser(user: User) {
         
-        DatabaseService.shared.retrieveOnce(queryString: user.uid, type: .post, eventType: .value) { [weak self] (snapshot) in
+        DatabaseService.shared.retrieveOnce(type: .post, eventType: .value, firstChild: user.uid, secondChild: nil, propagate: nil, sortBy: nil) { [weak self] (snapshot) in
             guard let this = self, let dictionaries = snapshot.value as? [String: Any] else { return }
             
             dictionaries.forEach({ (key, value) in
@@ -53,6 +53,18 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
                 
                 let post = Post(user: user, dictionary: dictionary)
                 this.posts.append(post)
+            })
+            
+            this.posts.sort(by: { (p1, p2) -> Bool in
+            
+                let time1 = Int(p1.creationDate)
+                let time2 = Int(p2.creationDate)
+                
+                if time1 > time2 {
+                    return true
+                } else {
+                    return false
+                }
             })
             
             this.collectionView?.reloadData()

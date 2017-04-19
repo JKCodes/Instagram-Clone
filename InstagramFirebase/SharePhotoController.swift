@@ -60,11 +60,11 @@ class SharePhotoController: UIViewController, Alerter {
     }
     
     fileprivate func saveToDatabase(imageUrl: String) {
-        guard let caption = textView.text, let postImage = selectedImage else { return }
+        guard let uid = AuthenticationService.shared.currentId(), let caption = textView.text, let postImage = selectedImage else { return }
         
         let values = ["imageUrl": imageUrl, "caption": caption, "imageWidth": postImage.size.width, "imageHeight": postImage.size.height, "creationDate": Date().timeIntervalSince1970] as [String: AnyObject]
 
-        DatabaseService.shared.saveData(uid: nil, type: .post, data: values) { [weak self] (error, _) in
+        DatabaseService.shared.saveData(type: .post, data: values, firstChild: uid, secondChild: nil, appendAutoId: true) { [weak self] (error, _) in
             guard let this = self else { return }
             if let error = error {
                 this.navigationItem.rightBarButtonItem?.isEnabled = true

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SignUpController: UIViewController, Alerter, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class SignUpController: UIViewController, UITextFieldDelegate, Alerter, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     fileprivate let contentOffset: CGFloat = 40
     fileprivate let plusPhotoButtonLength: CGFloat = 140
@@ -17,7 +17,7 @@ class SignUpController: UIViewController, Alerter, UIImagePickerControllerDelega
     fileprivate let stackViewSpacing: CGFloat = 10
     fileprivate let alreadyHaveAccountButtonHeight: CGFloat = 50
     
-    fileprivate static let buttonActiveColor: UIColor = .rgb(r: 17, g: 154, b: 237)
+    internal static let buttonActiveColor: UIColor = .rgb(r: 17, g: 154, b: 237)
     fileprivate static let buttonInactiveColor: UIColor = .rgb(r: 149, g: 204, b: 244)
     
     lazy var plusPhotoButton: UIButton = { [weak self] in
@@ -37,6 +37,7 @@ class SignUpController: UIViewController, Alerter, UIImagePickerControllerDelega
         tf.font = .systemFont(ofSize: 14)
         tf.keyboardType = .emailAddress
         tf.addTarget(this, action: #selector(handleTextInputChange), for: .editingChanged)
+        tf.delegate = this
         return tf
     }()
     
@@ -48,6 +49,7 @@ class SignUpController: UIViewController, Alerter, UIImagePickerControllerDelega
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
         tf.addTarget(this, action: #selector(handleTextInputChange), for: .editingChanged)
+        tf.delegate = this
         return tf
     }()
     
@@ -60,6 +62,7 @@ class SignUpController: UIViewController, Alerter, UIImagePickerControllerDelega
         tf.font = .systemFont(ofSize: 14)
         tf.isSecureTextEntry = true
         tf.addTarget(this, action: #selector(handleTextInputChange), for: .editingChanged)
+        tf.delegate = this
         return tf
     }()
     
@@ -179,7 +182,7 @@ extension SignUpController {
                     
                     var dictionaryValues = ["username": username as AnyObject, "profileImageUrl": profileImageUrl as AnyObject]
                     
-                    DatabaseService.shared.saveData(uid: uid, type: .user, data: dictionaryValues, onComplete: { [weak self] (error, _) in
+                    DatabaseService.shared.saveData(type: .user, data: dictionaryValues, firstChild: uid, secondChild: nil, appendAutoId: false, onComplete: { [weak self] (error, _) in
                         if let error = error {
                             this.present(this.alertVC(title: "Error saving data", message: error), animated: true, completion: nil)
                             return
@@ -188,7 +191,7 @@ extension SignUpController {
                         
                         dictionaryValues = [username: 1 as AnyObject]
                         
-                        DatabaseService.shared.saveData(uid: nil, type: .username, data: dictionaryValues, onComplete: { [weak self] (error, _) in
+                        DatabaseService.shared.saveData(type: .username, data: dictionaryValues, firstChild: nil, secondChild: nil, appendAutoId: false, onComplete: { [weak self] (error, _) in
                             guard let this = self else { return }
                             
                             if let error = error {
@@ -226,5 +229,14 @@ extension SignUpController {
     
     func handleAlreadyHaveAccount() {
         _ = navigationController?.popViewController(animated: true)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        handleSignUp()
+        return true
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
     }
 }

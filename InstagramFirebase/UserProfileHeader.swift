@@ -22,6 +22,9 @@ class UserProfileHeader: BaseCell {
             setupProfileImage()
             
             usernameLabel.text = user?.username
+            
+            setupEditFollowButton()
+            
         }
     }
     
@@ -101,7 +104,8 @@ class UserProfileHeader: BaseCell {
         return label
     }()
     
-    let editProfileButton: UIButton = {
+    lazy var editProfileFollowButton: UIButton = { [weak self] in
+        guard let this = self else { return UIButton() }
         let button = UIButton(type: .system)
         button.setTitle("Edit Profile", for: .normal)
         button.setTitleColor(.black, for: .normal)
@@ -109,6 +113,7 @@ class UserProfileHeader: BaseCell {
         button.layer.borderColor = UIColor.lightGray.cgColor
         button.layer.borderWidth = 1
         button.layer.cornerRadius = 3
+        button.addTarget(self, action: #selector(handleEditProfileOrFollow), for: .touchUpInside)
         return button
     }()
     
@@ -117,7 +122,7 @@ class UserProfileHeader: BaseCell {
         
         addSubview(profileImageView)
         addSubview(usernameLabel)
-        addSubview(editProfileButton)
+        addSubview(editProfileFollowButton)
         
         profileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, topConstant: contentOffset, leftConstant: contentOffset, bottomConstant: 0, rightConstant: 0, widthConstant: profileImageLength, heightConstant: profileImageLength)
    
@@ -168,6 +173,61 @@ class UserProfileHeader: BaseCell {
     }
     
     fileprivate func setupEditProfileButton() {
-        editProfileButton.anchor(top: postsLabel.bottomAnchor, left: postsLabel.leftAnchor, bottom: nil, right: followingLabel.rightAnchor, topConstant: 2, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: editProfileButtonHeight)
+        editProfileFollowButton.anchor(top: postsLabel.bottomAnchor, left: postsLabel.leftAnchor, bottom: nil, right: followingLabel.rightAnchor, topConstant: 2, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: editProfileButtonHeight)
+    }
+    
+    fileprivate func setupEditFollowButton() {
+        guard let currentLoggedInUserId = AuthenticationService.shared.currentId(), let userId = user?.uid else { return }
+        
+        if currentLoggedInUserId == userId {
+            
+        } else {
+            DatabaseService.shared.retrieveOnce(type: .following, eventType: .value, firstChild: currentLoggedInUserId, secondChild: userId, propagate: nil, sortBy: nil, onComplete: { [weak self] (snapshot) in
+                guard let this = self else { return }
+                if let isFollowing = snapshot.value as? Int, isFollowing == 1 {
+                    this.editProfileFollowButton.setTitle("Unfollow", for: .normal)
+                } else {
+                    this.setupFollowStyle()
+                }
+            })
+            
+        }
+        
+
+    }
+    
+    fileprivate func setupFollowStyle() {
+        editProfileFollowButton.setTitle("Follow", for: .normal)
+        editProfileFollowButton.backgroundColor = SignUpController.buttonActiveColor
+        editProfileFollowButton.setTitleColor(.white, for: .normal)
+        editProfileFollowButton.layer.borderColor = UIColor(white: 0, alpha: 0.2).cgColor
+    }
+}
+
+extension UserProfileHeader {
+    func handleEditProfileOrFollow() {
+        guard let uid = AuthenticationService.shared.currentId(), let userId = user?.uid else { return }
+        
+        if editProfileFollowButton.titleLabel?.text == "Unfollow" {
+            DatabaseService.shared.remove(type: .following, firstChild: uid, secondChild: userId) { [weak self] (error, _) in
+                if error != nil {
+                    print("Error has occurred while deleting data")
+                }
+                self?.setupFollowStyle()
+            }
+        } else {
+            let values = [userId: 1] as Dictionary<String, AnyObject>
+            DatabaseService.shared.saveData(type: .following, data: values, firstChild: uid, secondChild: nil, appendAutoId: false) { [weak self] (error, _) in
+                guard let this = self else { return }
+                if error != nil {
+                    print("Error has occurred while saving data")
+                    return
+                }
+                
+                this.editProfileFollowButton.setTitle("Unfollow", for: .normal)
+                this.editProfileFollowButton.backgroundColor = .white
+                this.editProfileFollowButton.setTitleColor(.black, for: .normal)
+            }
+        }
     }
 }
