@@ -23,6 +23,9 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
         setupNavigationItems()
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
         fetchPosts()
     }
     
@@ -32,6 +35,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func fetchPosts() {
         guard let uid = AuthenticationService.shared.currentId() else { return }
+        posts.removeAll()
         fetchPost(id: uid)
         
         DatabaseService.shared.retrieveOnce(type: .following, eventType: .value, firstChild: uid, secondChild: nil, propagate: false, sortBy: nil) { [weak self] (snapshot) in
