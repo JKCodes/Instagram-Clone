@@ -29,18 +29,30 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     fileprivate func setupNavigationItems() {
         navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "logo2"))
     }
-
+    
     fileprivate func fetchPosts() {
         guard let uid = AuthenticationService.shared.currentId() else { return }
+        fetchPost(id: uid)
         
-        DatabaseService.shared.retrieveOnce(type: .user, eventType: .value, firstChild: uid, secondChild: nil, propagate: nil, sortBy: nil) { [weak self] (snapshot) in
+        DatabaseService.shared.retrieveOnce(type: .following, eventType: .value, firstChild: uid, secondChild: nil, propagate: false, sortBy: nil) { [weak self] (snapshot) in
+            guard let userIdsDictionary = snapshot.value as? [String: AnyObject] else { return }
+            
+            userIdsDictionary.forEach({ [weak self] (key, value) in
+                self?.fetchPost(id: key)
+            })
+            
+        }
+    }
+    
+    fileprivate func fetchPost(id: String) {
+        
+        DatabaseService.shared.retrieveOnce(type: .user, eventType: .value, firstChild: id, secondChild: nil, propagate: nil, sortBy: nil) { [weak self] (snapshot) in
             guard let this = self, let userDictionary = snapshot.value as? [String: Any] else { return }
             
-            let user = User(uid: uid, dictionary: userDictionary)
-        
+            let user = User(uid: id, dictionary: userDictionary)
+            
             this.fetchPostWithUser(user: user)
         }
-        
     }
     
     fileprivate func fetchPostWithUser(user: User) {
@@ -56,15 +68,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             })
             
             this.posts.sort(by: { (p1, p2) -> Bool in
-            
-                let time1 = Int(p1.creationDate)
-                let time2 = Int(p2.creationDate)
-                
-                if time1 > time2 {
-                    return true
-                } else {
-                    return false
-                }
+                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
             })
             
             this.collectionView?.reloadData()

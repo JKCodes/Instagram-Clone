@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1BFE424BECB2184171928D4A /* Pods_InstagramFirebase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AB016D3CDD4C07ED546E455 /* Pods_InstagramFirebase.framework */; };
+		D8327EF21EA8B95C00771344 /* Date + timeAgoDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8327EF11EA8B95C00771344 /* Date + timeAgoDisplay.swift */; };
 		D83EF5951E9310310062380E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5941E9310310062380E /* AppDelegate.swift */; };
 		D83EF5971E9310310062380E /* SignUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5961E9310310062380E /* SignUpController.swift */; };
 		D83EF59A1E9310310062380E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D83EF5981E9310310062380E /* Main.storyboard */; };
@@ -42,6 +43,7 @@
 
 /* Begin PBXFileReference section */
 		9AB016D3CDD4C07ED546E455 /* Pods_InstagramFirebase.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_InstagramFirebase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D8327EF11EA8B95C00771344 /* Date + timeAgoDisplay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Date + timeAgoDisplay.swift"; sourceTree = "<group>"; };
 		D83EF5911E9310310062380E /* InstagramFirebase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstagramFirebase.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D83EF5941E9310310062380E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D83EF5961E9310310062380E /* SignUpController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpController.swift; sourceTree = "<group>"; };
@@ -187,6 +189,7 @@
 				D83EF5A61E9310EA0062380E /* Alerter.swift */,
 				D83EF5AB1E9310EA0062380E /* UIColor + rgb.swift */,
 				D83EF5AD1E9310EA0062380E /* UIView + Anchors.swift */,
+				D8327EF11EA8B95C00771344 /* Date + timeAgoDisplay.swift */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -356,6 +359,7 @@
 				D8D7F2041EA39F190023EF67 /* CustomImageView.swift in Sources */,
 				D848E6331E94E7BC00BD984F /* PhotoSelectorCell.swift in Sources */,
 				D87AA1B21E93AC2100E3E3B6 /* DatabaseService.swift in Sources */,
+				D8327EF21EA8B95C00771344 /* Date + timeAgoDisplay.swift in Sources */,
 				D83EF5B31E9310EA0062380E /* UIColor + rgb.swift in Sources */,
 				D87AA1B81E93E76100E3E3B6 /* UserProfileController.swift in Sources */,
 				D8D7F2001EA3898B0023EF67 /* UserSearchController.swift in Sources */,
