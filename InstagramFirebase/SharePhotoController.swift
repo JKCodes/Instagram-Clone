@@ -13,6 +13,9 @@ class SharePhotoController: UIViewController, Alerter {
     fileprivate let contentOffset: CGFloat = 8
     fileprivate let containerViewHeight: CGFloat = 100
     
+    static internal let updateFeedNotificationName = NSNotification.Name(rawValue: "UpdateFeed")
+
+    
     var selectedImage: UIImage? {
         didSet {
             imageView.image = selectedImage
@@ -72,6 +75,8 @@ class SharePhotoController: UIViewController, Alerter {
             }
             
             this.dismiss(animated: true, completion: nil)
+            
+            NotificationCenter.default.post(name: SharePhotoController.updateFeedNotificationName, object: nil)
         }
     }
     

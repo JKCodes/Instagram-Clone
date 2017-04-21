@@ -17,16 +17,24 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoController.updateFeedNotificationName, object: nil)
+        
         collectionView?.backgroundColor = .white
         
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
     
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView?.refreshControl = refreshControl
+        
         setupNavigationItems()
         
+        fetchPosts()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        fetchPosts()
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     fileprivate func setupNavigationItems() {
@@ -35,7 +43,6 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     
     fileprivate func fetchPosts() {
         guard let uid = AuthenticationService.shared.currentId() else { return }
-        posts.removeAll()
         fetchPost(id: uid)
         
         DatabaseService.shared.retrieveOnce(type: .following, eventType: .value, firstChild: uid, secondChild: nil, propagate: false, sortBy: nil) { [weak self] (snapshot) in
@@ -63,6 +70,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         DatabaseService.shared.retrieveOnce(type: .post, eventType: .value, firstChild: user.uid, secondChild: nil, propagate: nil, sortBy: nil) { [weak self] (snapshot) in
             guard let this = self, let dictionaries = snapshot.value as? [String: Any] else { return }
+            
+            this.collectionView?.refreshControl?.endRefreshing()
             
             dictionaries.forEach({ (key, value) in
                 guard let dictionary = value as? [String: Any] else { return }
@@ -96,5 +105,16 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
         cellHeight += HomePostCell.cellHeightMinusPhoto
         
         return CGSize(width: view.frame.width, height: cellHeight)
+    }
+}
+
+extension HomeController {
+    func handleRefresh() {
+        posts.removeAll()
+        fetchPosts()
+    }
+    
+    func handleUpdateFeed() {
+        handleRefresh()
     }
 }
