@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1BFE424BECB2184171928D4A /* Pods_InstagramFirebase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AB016D3CDD4C07ED546E455 /* Pods_InstagramFirebase.framework */; };
+		D811B3CA1EB00DFE00F5177E /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D811B3C91EB00DFE00F5177E /* CameraController.swift */; };
 		D8327EF21EA8B95C00771344 /* Date + timeAgoDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8327EF11EA8B95C00771344 /* Date + timeAgoDisplay.swift */; };
 		D83EF5951E9310310062380E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5941E9310310062380E /* AppDelegate.swift */; };
 		D83EF5971E9310310062380E /* SignUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5961E9310310062380E /* SignUpController.swift */; };
@@ -43,6 +44,7 @@
 
 /* Begin PBXFileReference section */
 		9AB016D3CDD4C07ED546E455 /* Pods_InstagramFirebase.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_InstagramFirebase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D811B3C91EB00DFE00F5177E /* CameraController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 		D8327EF11EA8B95C00771344 /* Date + timeAgoDisplay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Date + timeAgoDisplay.swift"; sourceTree = "<group>"; };
 		D83EF5911E9310310062380E /* InstagramFirebase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstagramFirebase.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D83EF5941E9310310062380E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -100,6 +102,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		D811B3C81EB00DE800F5177E /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				D811B3C91EB00DFE00F5177E /* CameraController.swift */,
+			);
+			name = Camera;
+			sourceTree = "<group>";
+		};
 		D83EF5881E9310310062380E = {
 			isa = PBXGroup;
 			children = (
@@ -121,6 +131,7 @@
 		D83EF5931E9310310062380E /* InstagramFirebase */ = {
 			isa = PBXGroup;
 			children = (
+				D811B3C81EB00DE800F5177E /* Camera */,
 				D848E6381E9538A600BD984F /* Model */,
 				D87AA1A91E93A8AC00E3E3B6 /* Utils */,
 				D86DBD2E1E9433F000F2E46F /* AddPhoto */,
@@ -357,6 +368,7 @@
 			files = (
 				D87AA1BB1E93EE7C00E3E3B6 /* UserProfileHeader.swift in Sources */,
 				D8D7F2041EA39F190023EF67 /* CustomImageView.swift in Sources */,
+				D811B3CA1EB00DFE00F5177E /* CameraController.swift in Sources */,
 				D848E6331E94E7BC00BD984F /* PhotoSelectorCell.swift in Sources */,
 				D87AA1B21E93AC2100E3E3B6 /* DatabaseService.swift in Sources */,
 				D8327EF21EA8B95C00771344 /* Date + timeAgoDisplay.swift in Sources */,
