@@ -208,6 +208,11 @@ extension UserProfileHeader {
     func handleEditProfileOrFollow() {
         guard let uid = AuthenticationService.shared.currentId(), let userId = user?.uid else { return }
         
+        if uid == userId {
+            print("Edit profile happened")
+            return
+        }
+        
         if editProfileFollowButton.titleLabel?.text == "Unfollow" {
             DatabaseService.shared.remove(type: .following, firstChild: uid, secondChild: userId) { [weak self] (error, _) in
                 if error != nil {
