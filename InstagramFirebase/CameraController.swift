@@ -9,12 +9,14 @@
 import UIKit
 import AVFoundation
 
-class CameraController: UIViewController {
+class CameraController: UIViewController, AVCapturePhotoCaptureDelegate {
     
     fileprivate let capturePhotoButtonBottomConstant: CGFloat = 24
     fileprivate let capturePhotoButtonLength: CGFloat = 80
     fileprivate let dismissButtonConstant: CGFloat = 12
     fileprivate let dismissButtonLength: CGFloat = 50
+    
+    let output = AVCapturePhotoOutput()
     
     lazy var capturePhotoButton: UIButton = { [weak self] in
         guard let this = self else { return UIButton() }
@@ -38,8 +40,27 @@ class CameraController: UIViewController {
         setupCaptureSession()
         setupHUD()
     }
+    
+    func capture(_ captureOutput: AVCapturePhotoOutput, didFinishProcessingPhotoSampleBuffer photoSampleBuffer: CMSampleBuffer?, previewPhotoSampleBuffer: CMSampleBuffer?, resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Error?) {
+        
+        guard let photoSampleBuffer = photoSampleBuffer, let previewPhotoSampleBuffer = previewPhotoSampleBuffer,
+            let imageData = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: photoSampleBuffer, previewPhotoSampleBuffer: previewPhotoSampleBuffer) else { return }
+        
+        let previewImage = UIImage(data: imageData)
+        
+        let containerView = PreviewPhotoContainerView()
+        containerView.previewImageView.image = previewImage
+        
+        view.addSubview(containerView)
+        containerView.fillSuperview()
+    }
+    
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
 }
 
+// MARK: - Setups
 extension CameraController {
     
     fileprivate func setupHUD() {
@@ -70,7 +91,6 @@ extension CameraController {
         }
 
         // Output setup
-        let output = AVCapturePhotoOutput()
         if captureSession.canAddOutput(output) {
             captureSession.addOutput(output)
         }
@@ -84,8 +104,21 @@ extension CameraController {
         captureSession.startRunning()
     }
     
+    
+}
+
+// MARK: - Handlers 
+
+extension CameraController {
     func handleCapturePhoto() {
         
+        let settings = AVCapturePhotoSettings()
+        
+        guard let previewFormatType = settings.availablePreviewPhotoPixelFormatTypes.first else { return }
+        
+        settings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewFormatType]
+        
+        output.capturePhoto(with: settings, delegate: self)
     }
     
     func handleDismiss() {
