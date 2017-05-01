@@ -38,6 +38,8 @@
 		D87AA1BD1E93EEAB00E3E3B6 /* BaseCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87AA1BC1E93EEAB00E3E3B6 /* BaseCell.swift */; };
 		D87AA1C01E93F10A00E3E3B6 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87AA1BF1E93F10A00E3E3B6 /* User.swift */; };
 		D87E08E31EB2190D00DDFE80 /* PreviewPhotoContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D87E08E21EB2190D00DDFE80 /* PreviewPhotoContainerView.swift */; };
+		D8A3894C1EB78DC00074241E /* CustomAnimationPresentor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A3894B1EB78DC00074241E /* CustomAnimationPresentor.swift */; };
+		D8A3894E1EB7915E0074241E /* CustomAnimationDismisser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A3894D1EB7915E0074241E /* CustomAnimationDismisser.swift */; };
 		D8D7F2001EA3898B0023EF67 /* UserSearchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D7F1FF1EA3898B0023EF67 /* UserSearchController.swift */; };
 		D8D7F2021EA389950023EF67 /* UserSearchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D7F2011EA389950023EF67 /* UserSearchCell.swift */; };
 		D8D7F2041EA39F190023EF67 /* CustomImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8D7F2031EA39F190023EF67 /* CustomImageView.swift */; };
@@ -77,6 +79,8 @@
 		D87AA1BC1E93EEAB00E3E3B6 /* BaseCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseCell.swift; sourceTree = "<group>"; };
 		D87AA1BF1E93F10A00E3E3B6 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		D87E08E21EB2190D00DDFE80 /* PreviewPhotoContainerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewPhotoContainerView.swift; sourceTree = "<group>"; };
+		D8A3894B1EB78DC00074241E /* CustomAnimationPresentor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomAnimationPresentor.swift; sourceTree = "<group>"; };
+		D8A3894D1EB7915E0074241E /* CustomAnimationDismisser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomAnimationDismisser.swift; sourceTree = "<group>"; };
 		D8D7F1FF1EA3898B0023EF67 /* UserSearchController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSearchController.swift; sourceTree = "<group>"; };
 		D8D7F2011EA389950023EF67 /* UserSearchCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSearchCell.swift; sourceTree = "<group>"; };
 		D8D7F2031EA39F190023EF67 /* CustomImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomImageView.swift; sourceTree = "<group>"; };
@@ -109,6 +113,8 @@
 			children = (
 				D811B3C91EB00DFE00F5177E /* CameraController.swift */,
 				D87E08E21EB2190D00DDFE80 /* PreviewPhotoContainerView.swift */,
+				D8A3894B1EB78DC00074241E /* CustomAnimationPresentor.swift */,
+				D8A3894D1EB7915E0074241E /* CustomAnimationDismisser.swift */,
 			);
 			name = Camera;
 			sourceTree = "<group>";
@@ -391,11 +397,13 @@
 				D848E6351E9519CC00BD984F /* PhotoSelectorHeader.swift in Sources */,
 				D848E6371E9522DE00BD984F /* SharePhotoController.swift in Sources */,
 				D83EF5AE1E9310EA0062380E /* Alerter.swift in Sources */,
+				D8A3894C1EB78DC00074241E /* CustomAnimationPresentor.swift in Sources */,
 				D86DBD2D1E940E8300F2E46F /* LoginController.swift in Sources */,
 				D87AA1B01E93AC2100E3E3B6 /* AuthenticationService.swift in Sources */,
 				D8727FB21E97AE9B007AFDD9 /* HomePostCell.swift in Sources */,
 				D8727FB01E97ACA7007AFDD9 /* HomeController.swift in Sources */,
 				D86DBD301E94341900F2E46F /* PhotoSelectorController.swift in Sources */,
+				D8A3894E1EB7915E0074241E /* CustomAnimationDismisser.swift in Sources */,
 				D87AA1B11E93AC2100E3E3B6 /* Constants.swift in Sources */,
 				D87E08E31EB2190D00DDFE80 /* PreviewPhotoContainerView.swift in Sources */,
 			);
