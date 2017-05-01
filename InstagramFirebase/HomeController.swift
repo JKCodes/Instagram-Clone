@@ -8,7 +8,7 @@
 
 import UIKit
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate {
     
     fileprivate let cellId = "cellId"
     fileprivate var cellHeight: CGFloat = 0
@@ -97,6 +97,7 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! HomePostCell
         
+        cell.delegate = self
         cell.post = posts[indexPath.item]
         
         return cell
@@ -123,5 +124,13 @@ extension HomeController {
     func handleCamera() {
         let cameraController = CameraController()
         present(cameraController, animated: true, completion: nil)
+    }
+}
+
+// MARK: - Delegation
+extension HomeController {
+    func didTapComment(post: Post) {
+        let commentsController = CommentsController(collectionViewLayout: UICollectionViewFlowLayout())
+        navigationController?.pushViewController(commentsController, animated: true)
     }
 }

@@ -8,6 +8,10 @@
 
 import UIKit
 
+protocol HomePostCellDelegate: class {
+    func didTapComment(post: Post)
+}
+
 class HomePostCell: BaseCell {
 
     fileprivate let contentOffset: CGFloat = 8
@@ -32,6 +36,8 @@ class HomePostCell: BaseCell {
             setupAttributedCaption()
         }
     }
+    
+    weak var delegate: HomePostCellDelegate?
     
     let userProfileImageView: CustomImageView = {
         let iv = CustomImageView()
@@ -67,9 +73,10 @@ class HomePostCell: BaseCell {
         return button
     }()
     
-    let commentButton: UIButton = {
+    lazy var commentButton: UIButton = { [unowned self] in
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "comment").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleComment), for: .touchUpInside)
         return button
     }()
     
@@ -138,5 +145,12 @@ class HomePostCell: BaseCell {
         attributedText.append(NSAttributedString(string: timeAgoDisplay, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14), NSForegroundColorAttributeName: UIColor.gray]))
         
         captionLabel.attributedText = attributedText
+    }
+}
+
+extension HomePostCell {
+    func handleComment() {
+        guard let post = post else { return }
+        delegate?.didTapComment(post: post)
     }
 }
