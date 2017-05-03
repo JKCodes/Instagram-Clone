@@ -8,13 +8,14 @@
 
 import UIKit
 
-class CommentsController: UICollectionViewController, Alerter {
+class CommentsController: UICollectionViewController, Alerter, UICollectionViewDelegateFlowLayout, UITextFieldDelegate {
     
-    var post: Post? {
-        didSet {
-            
-        }
-    }
+    fileprivate let cellId = "cellId"
+    fileprivate let cellHeight: CGFloat = 50
+    
+    var post: Post? 
+    
+    var comments = [Comment]()
     
     lazy var containerView: UIView = { [unowned self] in
         let containerView = UIView()
@@ -38,9 +39,10 @@ class CommentsController: UICollectionViewController, Alerter {
         return button
     }()
     
-    let commentTextField: UITextField = {
+    lazy var commentTextField: UITextField = { [unowned self] in
         let tf = UITextField()
         tf.placeholder = "Enter Comment"
+        tf.delegate = self
         return tf
     }()
     
@@ -49,8 +51,8 @@ class CommentsController: UICollectionViewController, Alerter {
         
         navigationItem.title = "Comments"
         
-        collectionView?.backgroundColor = .blue
-        
+        setupController()
+        fetchComments()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -72,21 +74,80 @@ class CommentsController: UICollectionViewController, Alerter {
     override var canBecomeFirstResponder: Bool {
         return true
     }
+    
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return comments.count
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! CommentCell
+        cell.comment = comments[indexPath.item]
+        return cell
+    }
+}
+
+// MRAK: - tf delegate
+
+extension CommentsController {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        handleSubmit()
+        return true
+    }
+}
+
+// MARK: - cv delegate
+
+extension CommentsController {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: view.frame.width, height: cellHeight)
+    }
+}
+
+// MARK: - Setups 
+extension CommentsController {
+    fileprivate func setupController() {
+        collectionView?.backgroundColor = .white
+        collectionView?.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
+        collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: -50, right: 0)
+        collectionView?.register(CommentCell.self, forCellWithReuseIdentifier: cellId)
+    }
 }
 
 // MARK: - Handlers
 extension CommentsController {
     func handleSubmit() {
+        guard let uid = AuthenticationService.shared.currentId(), let text = commentTextField.text else { return }
+        if text.characters.count < 1 {
+            present(alertVC(title: "Notice", message: "Please enter a comment first"), animated: true, completion: nil)
+            return
+        }
         
-        guard let uid = AuthenticationService.shared.currentId() else { return }
         let postId = self.post?.id ?? ""
-        let data = ["text": commentTextField.text ?? "", "creationDate": Date().timeIntervalSince1970, "uid": uid] as [String: AnyObject]
+        let data = ["text": text, "creationDate": Date().timeIntervalSince1970, "uid": uid] as [String: AnyObject]
         
         DatabaseService.shared.saveData(type: .comments, data: data, firstChild: postId, secondChild: nil, appendAutoId: true) { [weak self] (error, _) in
             guard let this = self else { return }
             if let error = error {
                 this.present(this.alertVC(title: "Error saving data", message: error), animated: true, completion: nil)
             }
+            this.commentTextField.text = nil
+        }
+    }
+}
+
+// MARK: - Others {
+extension CommentsController {
+    
+    fileprivate func fetchComments() {
+        guard let postId = post?.id else { return }
+        
+        DatabaseService.shared.retrieve(type: .comments, eventType: .childAdded, firstChild: postId, secondChild: nil, propagate: nil, sortBy: nil) { [weak self] (snapshot) in
+            guard let this = self, let dictionary = snapshot.value as? [String: Any] else { return }
+            
+            let comment = Comment(dictionary: dictionary)
+            
+            this.comments.append(comment)
+            this.collectionView?.reloadData()
         }
     }
 }

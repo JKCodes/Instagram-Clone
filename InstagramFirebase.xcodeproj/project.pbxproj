@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		1BFE424BECB2184171928D4A /* Pods_InstagramFirebase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AB016D3CDD4C07ED546E455 /* Pods_InstagramFirebase.framework */; };
 		D811B3CA1EB00DFE00F5177E /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D811B3C91EB00DFE00F5177E /* CameraController.swift */; };
+		D81509161EB9D15F00E1AC94 /* CommentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81509151EB9D15F00E1AC94 /* CommentCell.swift */; };
+		D81509181EB9D3A000E1AC94 /* Comment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81509171EB9D3A000E1AC94 /* Comment.swift */; };
 		D8327EF21EA8B95C00771344 /* Date + timeAgoDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8327EF11EA8B95C00771344 /* Date + timeAgoDisplay.swift */; };
 		D83EF5951E9310310062380E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5941E9310310062380E /* AppDelegate.swift */; };
 		D83EF5971E9310310062380E /* SignUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83EF5961E9310310062380E /* SignUpController.swift */; };
@@ -49,6 +51,8 @@
 /* Begin PBXFileReference section */
 		9AB016D3CDD4C07ED546E455 /* Pods_InstagramFirebase.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_InstagramFirebase.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D811B3C91EB00DFE00F5177E /* CameraController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
+		D81509151EB9D15F00E1AC94 /* CommentCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentCell.swift; sourceTree = "<group>"; };
+		D81509171EB9D3A000E1AC94 /* Comment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comment.swift; sourceTree = "<group>"; };
 		D8327EF11EA8B95C00771344 /* Date + timeAgoDisplay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Date + timeAgoDisplay.swift"; sourceTree = "<group>"; };
 		D83EF5911E9310310062380E /* InstagramFirebase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstagramFirebase.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D83EF5941E9310310062380E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -167,6 +171,7 @@
 			children = (
 				D87AA1BF1E93F10A00E3E3B6 /* User.swift */,
 				D848E6391E9538B900BD984F /* Post.swift */,
+				D81509171EB9D3A000E1AC94 /* Comment.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -239,6 +244,7 @@
 			isa = PBXGroup;
 			children = (
 				D8A389501EB7969B0074241E /* CommentsController.swift */,
+				D81509151EB9D15F00E1AC94 /* CommentCell.swift */,
 			);
 			name = Comments;
 			sourceTree = "<group>";
@@ -391,6 +397,7 @@
 				D811B3CA1EB00DFE00F5177E /* CameraController.swift in Sources */,
 				D848E6331E94E7BC00BD984F /* PhotoSelectorCell.swift in Sources */,
 				D87AA1B21E93AC2100E3E3B6 /* DatabaseService.swift in Sources */,
+				D81509181EB9D3A000E1AC94 /* Comment.swift in Sources */,
 				D8327EF21EA8B95C00771344 /* Date + timeAgoDisplay.swift in Sources */,
 				D83EF5B31E9310EA0062380E /* UIColor + rgb.swift in Sources */,
 				D87AA1B81E93E76100E3E3B6 /* UserProfileController.swift in Sources */,
@@ -400,6 +407,7 @@
 				D83EF5B51E9310EA0062380E /* UIView + Anchors.swift in Sources */,
 				D83EF5971E9310310062380E /* SignUpController.swift in Sources */,
 				D848E63C1E9539EF00BD984F /* UserProfilePhotoCell.swift in Sources */,
+				D81509161EB9D15F00E1AC94 /* CommentCell.swift in Sources */,
 				D87AA1C01E93F10A00E3E3B6 /* User.swift in Sources */,
 				D87AA1B61E93E6E900E3E3B6 /* CustomTabBarController.swift in Sources */,
 				D87AA1B31E93AC2100E3E3B6 /* StorageService.swift in Sources */,
