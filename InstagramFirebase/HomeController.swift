@@ -8,7 +8,7 @@
 
 import UIKit
 
-class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate {
+class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLayout, HomePostCellDelegate, Alerter {
     
     fileprivate let cellId = "cellId"
     fileprivate var cellHeight: CGFloat = 0
@@ -76,18 +76,25 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
             this.collectionView?.refreshControl?.endRefreshing()
             
             dictionaries.forEach({ (key, value) in
-                guard let dictionary = value as? [String: Any] else { return }
+                guard let dictionary = value as? [String: Any], let uid = AuthenticationService.shared.currentId() else { return }
                 
                 var post = Post(user: user, dictionary: dictionary)
                 post.id = key
-                this.posts.append(post)
+                
+                DatabaseService.shared.retrieveOnce(type: .like, eventType: .value, firstChild: key, secondChild: uid, propagate: false, sortBy: nil, onComplete: { (snapshot) in
+                    if let value = snapshot.value as? Int, value == 1 {
+                        post.hasLiked = true
+                    } else {
+                        post.hasLiked = false
+                    }
+                    this.posts.append(post)
+                    this.posts.sort(by: { (p1, p2) -> Bool in
+                        return p1.creationDate.compare(p2.creationDate) == .orderedDescending
+                    })
+                    
+                    this.collectionView?.reloadData()
+                })
             })
-            
-            this.posts.sort(by: { (p1, p2) -> Bool in
-                return p1.creationDate.compare(p2.creationDate) == .orderedDescending
-            })
-            
-            this.collectionView?.reloadData()
         }
     }
     
@@ -112,6 +119,8 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
     }
 }
 
+
+// MARK: - Handlers
 extension HomeController {
     func handleRefresh() {
         posts.removeAll()
@@ -134,5 +143,27 @@ extension HomeController {
         let commentsController = CommentsController(collectionViewLayout: UICollectionViewFlowLayout())
         commentsController.post = post
         navigationController?.pushViewController(commentsController, animated: true)
+    }
+    
+    func didLike(for cell: HomePostCell) {
+        guard let indexPath = collectionView?.indexPath(for: cell), let uid = AuthenticationService.shared.currentId() else { return }
+        
+        var post = posts[indexPath.item]
+        
+        guard let postId = post.id else { return }
+        
+        let values = [uid: post.hasLiked == true ? 0 : 1] as [String: AnyObject]
+        DatabaseService.shared.saveData(type: .like, data: values, firstChild: postId, secondChild: nil, appendAutoId: false) { [weak self] (error, _) in
+            guard let this = self else { return }
+            if error != nil {
+                this.present(this.alertVC(title: "Error saving data", message: "An expected error has occured while liking a post.  Please try again"), animated: true, completion: nil)
+                return
+            }
+            
+            post.hasLiked = !post.hasLiked
+            this.posts[indexPath.item] = post
+            this.collectionView?.reloadItems(at: [indexPath])
+        }
+        
     }
 }
