@@ -8,6 +8,11 @@
 
 import UIKit
 
+protocol UserProfileHeaderDelegate: class {
+    func didChangeToListView()
+    func didChangeToGridView()
+}
+
 class UserProfileHeader: BaseCell {
     
     fileprivate let contentOffset: CGFloat = 12
@@ -28,6 +33,8 @@ class UserProfileHeader: BaseCell {
         }
     }
     
+    weak var delegate: UserProfileHeaderDelegate?
+    
     let profileImageView: CustomImageView = {
         let iv = CustomImageView()
         iv.clipsToBounds = true
@@ -35,16 +42,18 @@ class UserProfileHeader: BaseCell {
         return iv
     }()
     
-    let gridButton: UIButton = {
+    lazy var gridButton: UIButton = { [unowned self] in
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "grid"), for: .normal)
+        button.addTarget(self, action: #selector(handleChangeToGridView), for: .touchUpInside)
         return button
     }()
     
-    let listButton: UIButton = {
+    lazy var listButton: UIButton = { [unowned self] in
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "list"), for: .normal)
         button.tintColor = UIColor(white: 0, alpha: 0.2)
+        button.addTarget(self, action: #selector(handleChangeToListView), for: .touchUpInside)
         return button
     }()
     
@@ -204,6 +213,8 @@ class UserProfileHeader: BaseCell {
     }
 }
 
+
+// MARK: - Handlers
 extension UserProfileHeader {
     func handleEditProfileOrFollow() {
         guard let uid = AuthenticationService.shared.currentId(), let userId = user?.uid else { return }
@@ -234,5 +245,17 @@ extension UserProfileHeader {
                 this.editProfileFollowButton.setTitleColor(.black, for: .normal)
             }
         }
+    }
+    
+    func handleChangeToListView() {
+        listButton.tintColor = .mainBlue()
+        gridButton.tintColor = UIColor(white: 0, alpha: 0.2)
+        delegate?.didChangeToListView()
+    }
+    
+    func handleChangeToGridView() {
+        listButton.tintColor = UIColor(white: 0, alpha: 0.2)
+        gridButton.tintColor = .mainBlue()
+        delegate?.didChangeToGridView()
     }
 }

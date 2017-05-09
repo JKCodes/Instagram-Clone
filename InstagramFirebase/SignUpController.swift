@@ -215,7 +215,7 @@ extension SignUpController {
     
     func handleTextInputChange() {
         let isFormValid = emailTextField.text?.characters.count ?? 0 > 0 && usernameTextField.text?.characters.count ?? 0 > 0 && passwordTextField.text?.characters.count ?? 0 > 0
-        signUpButton.backgroundColor = isFormValid ? SignUpController.buttonActiveColor : SignUpController.buttonInactiveColor
+        signUpButton.backgroundColor = isFormValid ? .mainBlue() : SignUpController.buttonInactiveColor
         signUpButton.isEnabled = isFormValid ? true : false
     }
     

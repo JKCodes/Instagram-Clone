@@ -12,12 +12,15 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     
     fileprivate let headerId = "headerId"
     fileprivate let cellId = "cellId"
+    fileprivate let homePostCellId = "homePostCellId"
     fileprivate let headerHeight: CGFloat = 200
-    
+    fileprivate var homeCellHeight: CGFloat = 0
+
     var userId: String?
     
     var user: User?
     var posts = [Post]()
+    var isGridView = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,6 +28,7 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
         collectionView?.backgroundColor = .white
         collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerId)
         collectionView?.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
         
         setupLogOutButton()
         
@@ -70,6 +74,7 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath) as! UserProfileHeader
         
+        header.delegate = self
         header.user = user
         
         return header
@@ -84,8 +89,16 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (view.frame.width - 2) / 3
-        return CGSize(width: width, height: width)
+        
+        if isGridView {
+            let width = (view.frame.width - 2) / 3
+            return CGSize(width: width, height: width)
+        } else {
+            homeCellHeight = view.frame.width // height = width
+            homeCellHeight += HomePostCell.cellHeightMinusPhoto
+            
+            return CGSize(width: view.frame.width, height: homeCellHeight)
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
@@ -97,14 +110,38 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! UserProfilePhotoCell
         
-        cell.post = posts[indexPath.item]
-        
-        return cell
+        if isGridView {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! UserProfilePhotoCell
+            cell.post = posts[indexPath.item]
+            return cell
+        } else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
+            cell.post = posts[indexPath.item]
+            return cell
+        }
     }
 }
 
+// MARK: - Delegate: UserProfileHeaderDelegate
+extension UserProfileController: UserProfileHeaderDelegate {
+    func didChangeToListView() {
+        if !isGridView { return }
+        swapGridList()
+    }
+    
+    func didChangeToGridView() {
+        if isGridView { return }
+        swapGridList()
+    }
+        
+    fileprivate func swapGridList() {
+        isGridView = !isGridView
+        collectionView?.reloadData()
+    }
+}
+
+// MARK: - Handlers
 extension UserProfileController {
     func handleLogOut() {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
