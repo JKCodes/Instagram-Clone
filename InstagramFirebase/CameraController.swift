@@ -55,7 +55,7 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewC
         return customAnimationDismisser
     }
     
-    func capture(_ captureOutput: AVCapturePhotoOutput, didFinishProcessingPhotoSampleBuffer photoSampleBuffer: CMSampleBuffer?, previewPhotoSampleBuffer: CMSampleBuffer?, resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Error?) {
+    func photoOutput(captureOutput: AVCapturePhotoOutput, didFinishProcessingPhoto photoSampleBuffer: CMSampleBuffer?, previewPhoto previewPhotoSampleBuffer: CMSampleBuffer?, resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Error?) {
         
         guard let photoSampleBuffer = photoSampleBuffer, let previewPhotoSampleBuffer = previewPhotoSampleBuffer,
             let imageData = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: photoSampleBuffer, previewPhotoSampleBuffer: previewPhotoSampleBuffer) else { return }
@@ -91,10 +91,10 @@ extension CameraController {
         // Input setup
         let captureSession = AVCaptureSession()
         
-        let captureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
+        let captureDevice = AVCaptureDevice.default(for: AVMediaType.video)
         
         do {
-            let input = try AVCaptureDeviceInput(device: captureDevice)
+            let input = try AVCaptureDeviceInput(device: captureDevice!)
             if captureSession.canAddInput(input) {
                 captureSession.addInput(input)
                 
@@ -110,7 +110,7 @@ extension CameraController {
         }
         
         // Preview setup
-        guard let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession) else { return }
+        let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         
         previewLayer.frame = view.frame
         view.layer.addSublayer(previewLayer)
@@ -124,7 +124,7 @@ extension CameraController {
 // MARK: - Handlers 
 
 extension CameraController {
-    func handleCapturePhoto() {
+    @objc func handleCapturePhoto() {
         
         let settings = AVCapturePhotoSettings()
         
@@ -135,7 +135,7 @@ extension CameraController {
         output.capturePhoto(with: settings, delegate: self)
     }
     
-    func handleDismiss() {
+    @objc func handleDismiss() {
         dismiss(animated: true, completion: nil)
     }
 }

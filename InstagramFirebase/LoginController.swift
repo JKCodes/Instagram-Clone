@@ -61,7 +61,7 @@ class LoginController: UIViewController, UITextFieldDelegate, Alerter {
         guard let this = self else { return UIButton() }
         let button = UIButton(type: .system)
         button.setTitle("Login", for: .normal)
-        button.backgroundColor = buttonInactiveColor
+        button.backgroundColor = LoginController.buttonInactiveColor
         button.layer.cornerRadius = 5
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 14)
         button.setTitleColor(.white, for: .normal)
@@ -74,9 +74,9 @@ class LoginController: UIViewController, UITextFieldDelegate, Alerter {
         guard let this = self else { return UIButton() }
         let button = UIButton(type: .system)
         
-        let attributedTitle = NSMutableAttributedString(string: "Don't have an account?  ", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14), NSForegroundColorAttributeName: UIColor.lightGray])
+        let attributedTitle = NSMutableAttributedString(string: "Don't have an account?  ", attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 14), NSAttributedStringKey.foregroundColor: UIColor.lightGray])
         
-        attributedTitle.append(NSAttributedString(string: "Sign Up", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14), NSForegroundColorAttributeName: UIColor.rgb(r: 17, g: 154, b: 237)
+        attributedTitle.append(NSAttributedString(string: "Sign Up", attributes: [NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: 14), NSAttributedStringKey.foregroundColor: UIColor.rgb(r: 17, g: 154, b: 237)
             ]))
         
         button.setAttributedTitle(attributedTitle, for: .normal)
@@ -121,7 +121,7 @@ class LoginController: UIViewController, UITextFieldDelegate, Alerter {
 
 extension LoginController {
     
-    func handleLogin() {
+    @objc func handleLogin() {
         guard let email = emailTextField.text, let password = passwordTextField.text else { return }
         if email.characters.count < 1 || password.characters.count < 1 { return }
         
@@ -142,12 +142,12 @@ extension LoginController {
 
     }
     
-    func handleShowSignUp() {
+    @objc func handleShowSignUp() {
         let signUpController = SignUpController()
         navigationController?.pushViewController(signUpController, animated: true)
     }
     
-    func handleTextInputChange() {
+    @objc func handleTextInputChange() {
         let isFormValid = emailTextField.text?.characters.count ?? 0 > 0 && passwordTextField.text?.characters.count ?? 0 > 0
         loginButton.backgroundColor = isFormValid ? LoginController.buttonActiveColor : LoginController.buttonInactiveColor
         loginButton.isEnabled = isFormValid ? true : false

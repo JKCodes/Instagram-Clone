@@ -143,7 +143,7 @@ extension CommentsController {
 
 // MARK: - Handlers
 extension CommentsController {
-    func handleSubmit() {
+    @objc func handleSubmit() {
         guard let uid = AuthenticationService.shared.currentId(), let text = commentTextField.text else { return }
         if text.characters.count < 1 {
             present(alertVC(title: "Notice", message: "Please enter a comment first"), animated: true, completion: nil)

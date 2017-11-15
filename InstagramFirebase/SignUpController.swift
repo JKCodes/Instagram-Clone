@@ -70,7 +70,7 @@ class SignUpController: UIViewController, UITextFieldDelegate, Alerter, UIImageP
         guard let this = self else { return UIButton() }
         let button = UIButton(type: .system)
         button.setTitle("Sign Up", for: .normal)
-        button.backgroundColor = buttonInactiveColor
+        button.backgroundColor = SignUpController.buttonInactiveColor
         button.layer.cornerRadius = 5
         button.titleLabel?.font = .boldSystemFont(ofSize: 14)
         button.setTitleColor(.white, for: .normal)
@@ -84,9 +84,9 @@ class SignUpController: UIViewController, UITextFieldDelegate, Alerter, UIImageP
         guard let this = self else { return UIButton() }
         let button = UIButton(type: .system)
         
-        let attributedTitle = NSMutableAttributedString(string: "Already have an account?  ", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14), NSForegroundColorAttributeName: UIColor.lightGray])
+        let attributedTitle = NSMutableAttributedString(string: "Already have an account?  ", attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 14), NSAttributedStringKey.foregroundColor: UIColor.lightGray])
         
-        attributedTitle.append(NSAttributedString(string: "Sign In", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14), NSForegroundColorAttributeName: UIColor.rgb(r: 17, g: 154, b: 237)
+        attributedTitle.append(NSAttributedString(string: "Sign In", attributes: [NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: 14), NSAttributedStringKey.foregroundColor: UIColor.rgb(r: 17, g: 154, b: 237)
             ]))
         
         button.setAttributedTitle(attributedTitle, for: .normal)
@@ -145,7 +145,7 @@ class SignUpController: UIViewController, UITextFieldDelegate, Alerter, UIImageP
 }
 
 extension SignUpController {
-    func handleSignUp() {
+    @objc func handleSignUp() {
         
         guard let email = emailTextField.text, let username = usernameTextField.text, let password = passwordTextField.text else { return }
         if email.characters.count < 1 || username.characters.count < 1 || password.characters.count < 1 { return }
@@ -213,13 +213,13 @@ extension SignUpController {
         }
     }
     
-    func handleTextInputChange() {
+    @objc func handleTextInputChange() {
         let isFormValid = emailTextField.text?.characters.count ?? 0 > 0 && usernameTextField.text?.characters.count ?? 0 > 0 && passwordTextField.text?.characters.count ?? 0 > 0
         signUpButton.backgroundColor = isFormValid ? .mainBlue() : SignUpController.buttonInactiveColor
         signUpButton.isEnabled = isFormValid ? true : false
     }
     
-    func handlePlusPhoto() {
+    @objc func handlePlusPhoto() {
         let imagePickerController = UIImagePickerController()
         imagePickerController.delegate = self
         imagePickerController.allowsEditing = true
@@ -227,7 +227,7 @@ extension SignUpController {
         present(imagePickerController, animated: true, completion: nil)
     }
     
-    func handleAlreadyHaveAccount() {
+    @objc func handleAlreadyHaveAccount() {
         _ = navigationController?.popViewController(animated: true)
     }
     

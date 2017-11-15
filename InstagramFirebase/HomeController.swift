@@ -122,16 +122,16 @@ class HomeController: UICollectionViewController, UICollectionViewDelegateFlowLa
 
 // MARK: - Handlers
 extension HomeController {
-    func handleRefresh() {
+    @objc func handleRefresh() {
         posts.removeAll()
         fetchPosts()
     }
     
-    func handleUpdateFeed() {
+    @objc func handleUpdateFeed() {
         handleRefresh()
     }
     
-    func handleCamera() {
+    @objc func handleCamera() {
         let cameraController = CameraController()
         present(cameraController, animated: true, completion: nil)
     }

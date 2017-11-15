@@ -143,7 +143,7 @@ extension UserProfileController: UserProfileHeaderDelegate {
 
 // MARK: - Handlers
 extension UserProfileController {
-    func handleLogOut() {
+    @objc func handleLogOut() {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
         alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { (_) in
