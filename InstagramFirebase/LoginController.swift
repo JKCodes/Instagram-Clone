@@ -123,7 +123,7 @@ extension LoginController {
     
     @objc func handleLogin() {
         guard let email = emailTextField.text, let password = passwordTextField.text else { return }
-        if email.characters.count < 1 || password.characters.count < 1 { return }
+        if email.count < 1 || password.count < 1 { return }
         
         AuthenticationService.shared.signIn(email: email, password: password) { [weak self] (error, user) in
             guard let this = self else { return }
@@ -148,7 +148,7 @@ extension LoginController {
     }
     
     @objc func handleTextInputChange() {
-        let isFormValid = emailTextField.text?.characters.count ?? 0 > 0 && passwordTextField.text?.characters.count ?? 0 > 0
+        let isFormValid = emailTextField.text?.count ?? 0 > 0 && passwordTextField.text?.count ?? 0 > 0
         loginButton.backgroundColor = isFormValid ? LoginController.buttonActiveColor : LoginController.buttonInactiveColor
         loginButton.isEnabled = isFormValid ? true : false
     }

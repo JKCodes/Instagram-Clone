@@ -148,7 +148,7 @@ extension SignUpController {
     @objc func handleSignUp() {
         
         guard let email = emailTextField.text, let username = usernameTextField.text, let password = passwordTextField.text else { return }
-        if email.characters.count < 1 || username.characters.count < 1 || password.characters.count < 1 { return }
+        if email.count < 1 || username.count < 1 || password.count < 1 { return }
         
         AuthenticationService.shared.createUser(email: email, password: password) { [weak self] (error, user) in
             guard let this = self else { return }
@@ -214,7 +214,7 @@ extension SignUpController {
     }
     
     @objc func handleTextInputChange() {
-        let isFormValid = emailTextField.text?.characters.count ?? 0 > 0 && usernameTextField.text?.characters.count ?? 0 > 0 && passwordTextField.text?.characters.count ?? 0 > 0
+        let isFormValid = emailTextField.text?.count ?? 0 > 0 && usernameTextField.text?.count ?? 0 > 0 && passwordTextField.text?.count ?? 0 > 0
         signUpButton.backgroundColor = isFormValid ? .mainBlue() : SignUpController.buttonInactiveColor
         signUpButton.isEnabled = isFormValid ? true : false
     }
