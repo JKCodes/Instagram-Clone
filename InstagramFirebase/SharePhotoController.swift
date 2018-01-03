@@ -88,7 +88,7 @@ class SharePhotoController: UIViewController, Alerter {
 extension SharePhotoController {
     @objc func handleShare() {
         guard let image = selectedImage, let uploadData = UIImageJPEGRepresentation(image, 0.3), let caption = textView.text else { return }
-        if caption.characters.count < 1 {
+        if caption.count < 1 {
             present(alertVC(title: "Caption is empty", message: "Please enter some text for your image"), animated: true, completion: nil)
             return
         }
