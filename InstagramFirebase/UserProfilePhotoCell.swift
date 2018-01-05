@@ -8,12 +8,12 @@
 
 import UIKit
 
-class UserProfilePhotoCell: BaseCell {
+class UserProfilePhotoCell: UICollectionViewCell {
     
     var post: Post? {
         didSet {
-            guard let urlString = post?.imageUrl else { return }
-            photoImageView.loadImage(urlString: urlString)
+            guard let imageUrl = post?.imageUrl else { return }
+            photoImageView.loadImage(urlString: imageUrl)
         }
     }
     
@@ -24,10 +24,15 @@ class UserProfilePhotoCell: BaseCell {
         return iv
     }()
     
-    override func setupViews() {
-        super.setupViews()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         
         addSubview(photoImageView)
-        photoImageView.fillSuperview()
+        photoImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
     }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
 }

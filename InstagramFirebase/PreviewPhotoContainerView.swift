@@ -11,115 +11,102 @@ import Photos
 
 class PreviewPhotoContainerView: UIView {
     
-    fileprivate let defaultSpacing: CGFloat = 12
-    fileprivate let cancelSaveButtonLength: CGFloat = 50
-    fileprivate let savedLabelHeight: CGFloat = 80
-    fileprivate let savedLabelWidth: CGFloat = 150
-
     let previewImageView: UIImageView = {
         let iv = UIImageView()
         return iv
     }()
     
-    lazy var cancelButton: UIButton = { [weak self] in
-        guard let this = self else { return UIButton() }
+    let cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "cancel_shadow"), for: .normal)
-        button.addTarget(this, action: #selector(handleCancel), for: .touchUpInside)
+        button.setImage(#imageLiteral(resourceName: "cancel_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleCancel), for: .touchUpInside)
         return button
     }()
     
-    lazy var saveButton: UIButton = { [weak self] in
-        guard let this = self else { return UIButton() }
+    let saveButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "save_shadow"), for: .normal)
-        button.addTarget(this, action: #selector(handleSave), for: .touchUpInside)
+        button.setImage(#imageLiteral(resourceName: "save_shadow").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleSave), for: .touchUpInside)
         return button
     }()
-    
-    lazy var savedLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Saved Successfully"
-        label.numberOfLines = 0
-        label.font = UIFont.boldSystemFont(ofSize: 18)
-        label.textColor = .white
-        label.backgroundColor = UIColor(white: 0, alpha: 0.3)
-        label.textAlignment = .center
-        return label
-    }()
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-        addSubview(previewImageView)
-        addSubview(cancelButton)
-        addSubview(saveButton)
-        
-        previewImageView.fillSuperview()
-        cancelButton.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, topConstant: defaultSpacing, leftConstant: defaultSpacing, bottomConstant: 0, rightConstant: 0, widthConstant: cancelSaveButtonLength, heightConstant: cancelSaveButtonLength)
-        saveButton.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: nil, topConstant: 0, leftConstant: defaultSpacing * 2, bottomConstant: defaultSpacing * 2, rightConstant: 0, widthConstant: cancelSaveButtonLength, heightConstant: cancelSaveButtonLength)
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-}
-
-// MARK: - Handlers
-extension PreviewPhotoContainerView {
-    @objc func handleCancel() {
-        removeFromSuperview()
-    }
     
     @objc func handleSave() {
+        print("Handling save...")
         
         guard let previewImage = previewImageView.image else { return }
         
         let library = PHPhotoLibrary.shared()
-        
-        library.performChanges({ 
+        library.performChanges({
+            
             PHAssetChangeRequest.creationRequestForAsset(from: previewImage)
-        }) { [weak self] (success, error) in
-            if let error = error {
-                print("Failed to save image to photo library:", error)
+            
+        }) { (success, err) in
+            if let err = err {
+                print("Failed to save image to photo library:", err)
                 return
             }
             
-            self?.displaySavedLabel()
-        }
-        
-    }
-}
-
-// MARK: - Others
-extension PreviewPhotoContainerView {
-    fileprivate func displaySavedLabel() {
-        DispatchQueue.main.async { [weak self] in
-            guard let this = self else { return }
+            print("Successfully saved image to library")
             
-            this.savedLabel.frame = CGRect(x: 0, y: 0, width: this.savedLabelWidth, height: this.savedLabelHeight)
-            this.savedLabel.center = this.center
-            
-            this.addSubview(this.savedLabel)
-            
-            this.savedLabel.layer.transform = CATransform3DMakeScale(0, 0, 0)
-            
-            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5, options: .curveEaseOut, animations: {
+            DispatchQueue.main.async {
+                let savedLabel = UILabel()
+                savedLabel.text = "Saved Successfully"
+                savedLabel.font = UIFont.boldSystemFont(ofSize: 18)
+                savedLabel.textColor = .white
+                savedLabel.numberOfLines = 0
+                savedLabel.backgroundColor = UIColor(white: 0, alpha: 0.3)
+                savedLabel.textAlignment = .center
                 
-                this.savedLabel.layer.transform = CATransform3DMakeScale(1, 1, 1)
-            }, completion: { (_) in
+                savedLabel.frame = CGRect(x: 0, y: 0, width: 150, height: 80)
+                savedLabel.center = self.center
                 
-                UIView.animate(withDuration: 0.5, delay: 0.75, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5, options: .curveEaseOut, animations: {
+                self.addSubview(savedLabel)
+                
+                savedLabel.layer.transform = CATransform3DMakeScale(0, 0, 0)
+                
+                UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5, options: .curveEaseOut, animations: {
                     
-                    this.savedLabel.layer.transform = CATransform3DMakeScale(0.1, 0.1, 0.1)
-                    this.savedLabel.alpha = 0
+                    savedLabel.layer.transform = CATransform3DMakeScale(1, 1, 1)
                     
-                }, completion: { (_) in
-                    this.savedLabel.removeFromSuperview()
+                }, completion: { (completed) in
+                    //completed
+                    
+                    UIView.animate(withDuration: 0.5, delay: 0.75, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5, options: .curveEaseOut, animations: {
+                        
+                        savedLabel.layer.transform = CATransform3DMakeScale(0.1, 0.1, 0.1)
+                        savedLabel.alpha = 0
+                        
+                    }, completion: { (_) in
+                        
+                        savedLabel.removeFromSuperview()
+                        
+                    })
+                    
                 })
-                
-            })
+            }
+            
         }
+    }
+    
+    @objc func handleCancel() {
+        self.removeFromSuperview()
+    }
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .yellow
+        
+        addSubview(previewImageView)
+        previewImageView.anchor(top: topAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        addSubview(cancelButton)
+        cancelButton.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 12, paddingLeft: 12, paddingBottom: 0, paddingRight: 0, width: 50, height: 50)
+        
+        addSubview(saveButton)
+        saveButton.anchor(top: nil, left: leftAnchor, bottom: bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 24, paddingBottom: 24, paddingRight: 0, width: 50, height: 50)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

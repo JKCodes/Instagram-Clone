@@ -2,8 +2,8 @@
 //  CustomImageView.swift
 //  InstagramFirebase
 //
-//  Created by Joseph Kim on 4/16/17.
-//  Copyright © 2017 Joseph Kim. All rights reserved.
+//  Created by Joseph Kim on 1/5/18.
+//  Copyright © 2018 Joseph Kim. All rights reserved.
 //
 
 import UIKit
@@ -26,26 +26,26 @@ class CustomImageView: UIImageView {
         
         guard let url = URL(string: urlString) else { return }
         
-        URLSession.shared.dataTask(with: url) { [weak self] (data, response, err) in
-            guard let this = self, let imageData = data else { return }
-            
+        URLSession.shared.dataTask(with: url) { (data, response, err) in
             if let err = err {
                 print("Failed to fetch post image:", err)
                 return
             }
             
-            if url.absoluteString != this.lastURLUsedToLoadImage {
+            if url.absoluteString != self.lastURLUsedToLoadImage {
                 return
             }
-
+            
+            guard let imageData = data else { return }
+            
             let photoImage = UIImage(data: imageData)
             
             imageCache[url.absoluteString] = photoImage
             
             DispatchQueue.main.async {
-                this.image = photoImage
+                self.image = photoImage
             }
             
-        }.resume()
+            }.resume()
     }
 }

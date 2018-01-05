@@ -8,11 +8,7 @@
 
 import UIKit
 
-class UserSearchCell: BaseCell {
-    
-    fileprivate let cellSpacing: CGFloat = 8
-    fileprivate let profileImageHeight: CGFloat = 50
-    fileprivate let separatorHeight: CGFloat = 0.5
+class UserSearchCell: UICollectionViewCell {
     
     var user: User? {
         didSet {
@@ -38,24 +34,27 @@ class UserSearchCell: BaseCell {
         return label
     }()
     
-    let separatorView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor(white: 0, alpha: 0.5)
-        return view
-    }()
-    
-    override func setupViews() {
-        super.setupViews()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         
         addSubview(profileImageView)
         addSubview(usernameLabel)
-        addSubview(separatorView)
         
-        profileImageView.anchor(top: nil, left: leftAnchor, bottom: nil, right: nil, topConstant: 0, leftConstant: cellSpacing, bottomConstant: 0, rightConstant: 0, widthConstant: profileImageHeight, heightConstant: profileImageHeight)
-        profileImageView.anchorCenterYToSuperview()
-        profileImageView.layer.cornerRadius = profileImageHeight / 2
-        usernameLabel.anchor(top: topAnchor, left: profileImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, topConstant: 0, leftConstant: cellSpacing, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 0)
-        separatorView.anchor(top: nil, left: usernameLabel.leftAnchor, bottom: bottomAnchor, right: rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: separatorHeight)        
+        profileImageView.anchor(top: nil, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 50, height: 50)
+        profileImageView.layer.cornerRadius = 50 / 2
+        profileImageView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        
+        usernameLabel.anchor(top: topAnchor, left: profileImageView.rightAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        let separatorView = UIView()
+        separatorView.backgroundColor = UIColor(white: 0, alpha: 0.5)
+        addSubview(separatorView)
+        separatorView.anchor(top: nil, left: usernameLabel.leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0.5)
+        
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
 }

@@ -8,39 +8,52 @@
 
 import UIKit
 
-protocol HomePostCellDelegate: class {
+protocol HomePostCellDelegate {
     func didTapComment(post: Post)
     func didLike(for cell: HomePostCell)
 }
 
-class HomePostCell: BaseCell {
-
-    fileprivate let contentOffset: CGFloat = 8
-    fileprivate let userProfileImageLength: CGFloat = 40
-    fileprivate let optionsButtonWidth: CGFloat = 44
-    fileprivate let stackViewWidth: CGFloat = 120
-    fileprivate let stackViewHeight: CGFloat = 50
-    fileprivate let bookmarkButtonWidth: CGFloat = 40
-    fileprivate let bookmarkButtonHeight: CGFloat = 50
+class HomePostCell: UICollectionViewCell {
     
-    // top to bottom => offset + userprofileImageLength + offset + stackViewHeight + desiredCaptionHeight
-    internal static let cellHeightMinusPhoto: CGFloat = 8 + 40 + 8 + 50 + 60
-    
+    var delegate: HomePostCellDelegate?
     
     var post: Post? {
         didSet {
-            guard let urlString = post?.imageUrl, let profileImageUrl = post?.user.profileImageUrl else { return }
+            guard let postImageUrl = post?.imageUrl else { return }
             
             likeButton.setImage(post?.hasLiked == true ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
             
-            photoImageView.loadImage(urlString: urlString)
+            photoImageView.loadImage(urlString: postImageUrl)
+            
+            usernameLabel.text = "TEST USERNAME"
+            
+            //wouldn't this be nice?
             usernameLabel.text = post?.user.username
+            
+            guard let profileImageUrl = post?.user.profileImageUrl else { return }
+            
             userProfileImageView.loadImage(urlString: profileImageUrl)
+            
+            //            captionLabel.text = post?.caption
+            
             setupAttributedCaption()
         }
     }
     
-    weak var delegate: HomePostCellDelegate?
+    fileprivate func setupAttributedCaption() {
+        guard let post = self.post else { return }
+        
+        let attributedText = NSMutableAttributedString(string: post.user.username, attributes: [NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: 14)])
+        
+        attributedText.append(NSAttributedString(string: " \(post.caption)", attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 14)]))
+        
+        attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 4)]))
+        
+        let timeAgoDisplay = post.creationDate.timeAgoDisplay()
+        attributedText.append(NSAttributedString(string: timeAgoDisplay, attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 14), NSAttributedStringKey.foregroundColor: UIColor.gray]))
+        
+        captionLabel.attributedText = attributedText
+    }
     
     let userProfileImageView: CustomImageView = {
         let iv = CustomImageView()
@@ -48,7 +61,7 @@ class HomePostCell: BaseCell {
         iv.clipsToBounds = true
         return iv
     }()
-
+    
     let photoImageView: CustomImageView = {
         let iv = CustomImageView()
         iv.contentMode = .scaleAspectFill
@@ -70,19 +83,31 @@ class HomePostCell: BaseCell {
         return button
     }()
     
-    lazy var likeButton: UIButton = { [unowned self] in
+    lazy var likeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleLike), for: .touchUpInside)
         return button
     }()
     
-    lazy var commentButton: UIButton = { [unowned self] in
+    @objc func handleLike() {
+        print("Handling like from within cell...")
+        delegate?.didLike(for: self)
+    }
+    
+    lazy var commentButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "comment").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handleComment), for: .touchUpInside)
         return button
     }()
+    
+    @objc func handleComment() {
+        print("Trying to show comments...")
+        guard let post = post else { return }
+        
+        delegate?.didTapComment(post: post)
+    }
     
     let sendMessageButton: UIButton = {
         let button = UIButton(type: .system)
@@ -102,26 +127,27 @@ class HomePostCell: BaseCell {
         return label
     }()
     
-    override func setupViews() {
-        super.setupViews()
-        
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         addSubview(userProfileImageView)
-        addSubview(photoImageView)
         addSubview(usernameLabel)
         addSubview(optionsButton)
-        addSubview(captionLabel)
+        addSubview(photoImageView)
         
-        userProfileImageView.layer.cornerRadius = userProfileImageLength / 2
+        userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 8, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 40, height: 40)
+        userProfileImageView.layer.cornerRadius = 40 / 2
         
-        userProfileImageView.anchor(top: topAnchor, left: leftAnchor, bottom: nil, right: nil, topConstant: contentOffset, leftConstant: contentOffset, bottomConstant: 0, rightConstant: 0, widthConstant: userProfileImageLength, heightConstant: userProfileImageLength)
-        photoImageView.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, topConstant: contentOffset, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 0)
+        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: optionsButton.leftAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        optionsButton.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 44, height: 0)
+        
+        photoImageView.anchor(top: userProfileImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: rightAnchor, paddingTop: 8, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
         photoImageView.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
-        optionsButton.anchor(top: topAnchor, left: nil, bottom: photoImageView.topAnchor, right: rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: optionsButtonWidth, heightConstant: 0)
-        usernameLabel.anchor(top: topAnchor, left: userProfileImageView.rightAnchor, bottom: photoImageView.topAnchor, right: optionsButton.leftAnchor, topConstant: 0, leftConstant: contentOffset, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 0)
         
         setupActionButtons()
         
-        captionLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, topConstant: 0, leftConstant: contentOffset, bottomConstant: 0, rightConstant: contentOffset, widthConstant: 0, heightConstant: 0)
+        addSubview(captionLabel)
+        captionLabel.anchor(top: likeButton.bottomAnchor, left: leftAnchor, bottom: bottomAnchor, right: rightAnchor, paddingTop: 0, paddingLeft: 8, paddingBottom: 0, paddingRight: 8, width: 0, height: 0)
     }
     
     fileprivate func setupActionButtons() {
@@ -130,37 +156,13 @@ class HomePostCell: BaseCell {
         stackView.distribution = .fillEqually
         
         addSubview(stackView)
+        stackView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, paddingTop: 0, paddingLeft: 4, paddingBottom: 0, paddingRight: 0, width: 120, height: 50)
+        
         addSubview(bookmarkButton)
-
-        stackView.anchor(top: photoImageView.bottomAnchor, left: leftAnchor, bottom: nil, right: nil, topConstant: 0, leftConstant: contentOffset / 2, bottomConstant: 0, rightConstant: 0, widthConstant: stackViewWidth, heightConstant: stackViewHeight)
-        bookmarkButton.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: bookmarkButtonWidth, heightConstant: bookmarkButtonHeight)
+        bookmarkButton.anchor(top: photoImageView.bottomAnchor, left: nil, bottom: nil, right: rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 40, height: 50)
     }
     
-    fileprivate func setupAttributedCaption() {
-        guard let post = post else { return }
-        
-        let attributedText = NSMutableAttributedString(string: post.user.username, attributes: [NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: 14)])
-        
-        attributedText.append(NSAttributedString(string: " \(post.caption)", attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 14)]))
-        
-        attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 4)]))
-        
-        let timeAgoDisplay = post.creationDate.timeAgoDisplay()
-        attributedText.append(NSAttributedString(string: timeAgoDisplay, attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 14), NSAttributedStringKey.foregroundColor: UIColor.gray]))
-        
-        captionLabel.attributedText = attributedText
-    }
-}
-
-
-// MARK: - Handlers
-extension HomePostCell {
-    @objc func handleComment() {
-        guard let post = post else { return }
-        delegate?.didTapComment(post: post)
-    }
-    
-    @objc func handleLike() {
-        delegate?.didLike(for: self)
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

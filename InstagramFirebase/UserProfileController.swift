@@ -7,109 +7,164 @@
 //
 
 import UIKit
+import Firebase
 
-class UserProfileController: UICollectionViewController, Alerter, UICollectionViewDelegateFlowLayout {
+class UserProfileController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate {
     
-    fileprivate let headerId = "headerId"
-    fileprivate let cellId = "cellId"
-    fileprivate let homePostCellId = "homePostCellId"
-    fileprivate let headerHeight: CGFloat = 200
-    fileprivate var homeCellHeight: CGFloat = 0
-
+    let cellId = "cellId"
+    let homePostCellId = "homePostCellId"
+    
     var userId: String?
     
-    var user: User?
-    var posts = [Post]()
     var isGridView = true
+    
+    func didChangeToGridView() {
+        isGridView = true
+        collectionView?.reloadData()
+    }
+    
+    func didChangeToListView() {
+        isGridView = false
+        collectionView?.reloadData()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         collectionView?.backgroundColor = .white
-        collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerId)
+        collectionView?.register(UserProfileHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerId")
         collectionView?.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
         collectionView?.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
         
         setupLogOutButton()
         
         fetchUser()
+        //fetchOrderedPosts()
     }
     
-    fileprivate func fetchUser() {
+    var isFinishedPaging = false
+    var posts = [Post]()
+    
+    fileprivate func paginatePosts() {
+        print("Start paging for more posts")
         
-        guard let uid = userId ?? AuthenticationService.shared.currentId() else { return }
+        guard let uid = self.user?.uid else { return }
+        let ref = Database.database().reference().child("posts").child(uid)
         
-        DatabaseService.shared.retrieveOnce(type: .user, eventType: .value, firstChild: uid, secondChild: nil, propagate: nil, sortBy: nil) { [weak self] (snapshot) in
-            guard let this = self, let dictionary = snapshot.value as? [String: Any] else { return }
-                        
-            this.user = User(uid: uid, dictionary: dictionary)
-            this.navigationItem.title = this.user?.username
+        //        let value = "-Kh0B6AleC8OgIF-mZNT"
+        //        let query = ref.queryOrderedByKey().queryStarting(atValue: value).queryLimited(toFirst: 6)
+        
+        //        var query = ref.queryOrderedByKey()
+        
+        var query = ref.queryOrdered(byChild: "creationDate")
+        
+        if posts.count > 0 {
+            //            let value = posts.last?.id
+            let value = posts.last?.creationDate.timeIntervalSince1970
+            query = query.queryEnding(atValue: value)
+        }
+        
+        query.queryLimited(toLast: 4).observeSingleEvent(of: .value, with: { (snapshot) in
             
-            this.collectionView?.reloadData()
+            guard var allObjects = snapshot.children.allObjects as? [DataSnapshot] else { return }
             
-            this.fetchOrderedPosts()
+            allObjects.reverse()
+            
+            if allObjects.count < 4 {
+                self.isFinishedPaging = true
+            }
+            
+            if self.posts.count > 0 && allObjects.count > 0 {
+                allObjects.removeFirst()
+            }
+            
+            guard let user = self.user else { return }
+            
+            allObjects.forEach({ (snapshot) in
+                
+                guard let dictionary = snapshot.value as? [String: Any] else { return }
+                var post = Post(user: user, dictionary: dictionary)
+                post.id = snapshot.key
+                
+                self.posts.append(post)
+                
+                //                print(snapshot.key)
+            })
+            
+            self.posts.forEach({ (post) in
+                print(post.id ?? "")
+            })
+            
+            self.collectionView?.reloadData()
+            
+            
+        }) { (err) in
+            print("Failed to paginate for posts:", err)
         }
     }
     
     fileprivate func fetchOrderedPosts() {
         guard let uid = self.user?.uid else { return }
-
-        DatabaseService.shared.retrieve(type: .post, eventType: .childAdded, firstChild: uid, secondChild: nil, propagate: nil, sortBy: "creationDate") { [weak self] (snapshot) in
-            guard let this = self, let user = this.user, let dictionary = snapshot.value as? [String: Any] else { return }
-                        
-            let post = Post(user: user, dictionary: dictionary)
-
-            this.posts.insert(post, at: 0)
+        let ref = Database.database().reference().child("posts").child(uid)
+        
+        //perhaps later on we'll implement some pagination of data
+        ref.queryOrdered(byChild: "creationDate").observe(.childAdded, with: { (snapshot) in
+            guard let dictionary = snapshot.value as? [String: Any] else { return }
             
-            this.collectionView?.reloadData()
-
+            guard let user = self.user else { return }
+            
+            let post = Post(user: user, dictionary: dictionary)
+            
+            self.posts.insert(post, at: 0)
+            //            self.posts.append(post)
+            
+            self.collectionView?.reloadData()
+            
+        }) { (err) in
+            print("Failed to fetch ordered posts:", err)
         }
     }
     
     fileprivate func setupLogOutButton() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "gear"), style: .plain, target: self, action: #selector(handleLogOut))
-        navigationItem.rightBarButtonItem?.tintColor = .black
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "gear").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleLogOut))
     }
     
-    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerId, for: indexPath) as! UserProfileHeader
+    @objc func handleLogOut() {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        header.delegate = self
-        header.user = user
+        alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { (_) in
+            
+            do {
+                try Auth.auth().signOut()
+                
+                //what happens? we need to present some kind of login controller
+                let loginController = LoginController()
+                let navController = UINavigationController(rootViewController: loginController)
+                self.present(navController, animated: true, completion: nil)
+                
+            } catch let signOutErr {
+                print("Failed to sign out:", signOutErr)
+            }
+            
+            
+        }))
         
-        return header
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: view.frame.width, height: headerHeight)
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        present(alertController, animated: true, completion: nil)
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return posts.count
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
-        if isGridView {
-            let width = (view.frame.width - 2) / 3
-            return CGSize(width: width, height: width)
-        } else {
-            homeCellHeight = view.frame.width // height = width
-            homeCellHeight += HomePostCell.cellHeightMinusPhoto
-            
-            return CGSize(width: view.frame.width, height: homeCellHeight)
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 1
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 1
-    }
-    
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        // show you how to fire off the paginate call
+        if indexPath.item == self.posts.count - 1 && !isFinishedPaging {
+            print("Paginating for posts")
+            paginatePosts()
+        }
         
         if isGridView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! UserProfilePhotoCell
@@ -121,50 +176,61 @@ class UserProfileController: UICollectionViewController, Alerter, UICollectionVi
             return cell
         }
     }
-}
-
-// MARK: - Delegate: UserProfileHeaderDelegate
-extension UserProfileController: UserProfileHeaderDelegate {
-    func didChangeToListView() {
-        if !isGridView { return }
-        swapGridList()
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 1
     }
     
-    func didChangeToGridView() {
-        if isGridView { return }
-        swapGridList()
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 1
     }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-    fileprivate func swapGridList() {
-        isGridView = !isGridView
-        collectionView?.reloadData()
+        if isGridView {
+            let width = (view.frame.width - 2) / 3
+            return CGSize(width: width, height: width)
+        } else {
+            
+            var height: CGFloat = 40 + 8 + 8 //username userprofileimageview
+            height += view.frame.width
+            height += 50
+            height += 60
+            
+            return CGSize(width: view.frame.width, height: height)
+        }
     }
-}
-
-// MARK: - Handlers
-extension UserProfileController {
-    @objc func handleLogOut() {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+    
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "headerId", for: indexPath) as! UserProfileHeader
         
-        alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { (_) in
-            AuthenticationService.shared.signOut(onCompletion: { [weak self] (error, _) in
-                guard let this = self else { return }
-                
-                if let error = error {
-                    this.present(this.alertVC(title: "Error signing out", message: error), animated: true, completion: nil)
-                    return
-                }
-                
-                let loginController = LoginController()
-                let navController = UINavigationController(rootViewController: loginController)
-                this.present(navController, animated: true, completion: nil)
-                
-            })
-        }))
+        header.user = self.user
+        header.delegate = self
         
-        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        //not correct
+        //header.addSubview(UIImageView())
+        
+        return header
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: view.frame.width, height: 200)
+    }
+    
+    var user: User?
+    fileprivate func fetchUser() {
+        
+        let uid = userId ?? (Auth.auth().currentUser?.uid ?? "")
+        
+        //guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        Database.fetchUserWithUID(uid: uid) { (user) in
+            self.user = user
+            self.navigationItem.title = self.user?.username
             
+            self.collectionView?.reloadData()
             
-        present(alertController, animated: true, completion: nil)
+            self.paginatePosts()
+        }
     }
 }

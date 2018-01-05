@@ -11,28 +11,21 @@ import AVFoundation
 
 class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewControllerTransitioningDelegate {
     
-    fileprivate let capturePhotoButtonBottomConstant: CGFloat = 24
-    fileprivate let capturePhotoButtonLength: CGFloat = 80
-    fileprivate let dismissButtonConstant: CGFloat = 12
-    fileprivate let dismissButtonLength: CGFloat = 50
-    
-    let output = AVCapturePhotoOutput()
-    let customAnimationPresentor = CustomAnimationPresentor()
-    let customAnimationDismisser = CustomAnimationDismisser()
-    
-    lazy var capturePhotoButton: UIButton = { [weak self] in
-        guard let this = self else { return UIButton() }
+    let dismissButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "capture_photo"), for: .normal)
-        button.addTarget(this, action: #selector(handleCapturePhoto), for: .touchUpInside)
+        button.setImage(#imageLiteral(resourceName: "right_arrow_shadow"), for: .normal)
+        button.addTarget(self, action: #selector(handleDismiss), for: .touchUpInside)
         return button
     }()
     
-    lazy var dismissButton: UIButton = { [weak self] in
-        guard let this = self else { return UIButton() }
+    @objc func handleDismiss() {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    let capturePhotoButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "right_arrow_shadow"), for: .normal)
-        button.addTarget(this, action: #selector(handleDismiss), for: .touchUpInside)
+        button.setImage(#imageLiteral(resourceName: "capture_photo"), for: .normal)
+        button.addTarget(self, action: #selector(handleCapturePhoto), for: .touchUpInside)
         return button
     }()
     
@@ -45,6 +38,9 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewC
         setupHUD()
     }
     
+    let customAnimationPresentor = CustomAnimationPresentor()
+    let customAnimationDismisser = CustomAnimationDismisser()
+    
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         
         return customAnimationPresentor
@@ -55,76 +51,21 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewC
         return customAnimationDismisser
     }
     
-    func photoOutput(captureOutput: AVCapturePhotoOutput, didFinishProcessingPhoto photoSampleBuffer: CMSampleBuffer?, previewPhoto previewPhotoSampleBuffer: CMSampleBuffer?, resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Error?) {
-        
-        guard let photoSampleBuffer = photoSampleBuffer, let previewPhotoSampleBuffer = previewPhotoSampleBuffer,
-            let imageData = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: photoSampleBuffer, previewPhotoSampleBuffer: previewPhotoSampleBuffer) else { return }
-        
-        let previewImage = UIImage(data: imageData)
-        
-        let containerView = PreviewPhotoContainerView()
-        containerView.previewImageView.image = previewImage
-        
-        view.addSubview(containerView)
-        containerView.fillSuperview()
-    }
-    
     override var prefersStatusBarHidden: Bool {
         return true
     }
-}
-
-// MARK: - Setups
-extension CameraController {
     
     fileprivate func setupHUD() {
         view.addSubview(capturePhotoButton)
+        capturePhotoButton.anchor(top: nil, left: nil, bottom: view.bottomAnchor, right: nil, paddingTop: 0, paddingLeft: 0, paddingBottom: 24, paddingRight: 0, width: 80, height: 80)
+        capturePhotoButton.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        
         view.addSubview(dismissButton)
-        
-        capturePhotoButton.anchor(top: nil, left: nil, bottom: view.bottomAnchor, right: nil, topConstant: 0, leftConstant: 0, bottomConstant: capturePhotoButtonBottomConstant, rightConstant: 0, widthConstant: capturePhotoButtonLength, heightConstant: capturePhotoButtonLength)
-        capturePhotoButton.anchorCenterXToSuperview()
-        dismissButton.anchor(top: view.topAnchor, left: nil, bottom: nil, right: view.rightAnchor, topConstant: dismissButtonConstant, leftConstant: 0, bottomConstant: 0, rightConstant: dismissButtonConstant, widthConstant: dismissButtonLength, heightConstant: dismissButtonLength)
+        dismissButton.anchor(top: view.topAnchor, left: nil, bottom: nil, right: view.rightAnchor, paddingTop: 12, paddingLeft: 0, paddingBottom: 0, paddingRight: 12, width: 50, height: 50)
     }
     
-    fileprivate func setupCaptureSession() {
-        
-        // Input setup
-        let captureSession = AVCaptureSession()
-        
-        let captureDevice = AVCaptureDevice.default(for: AVMediaType.video)
-        
-        do {
-            let input = try AVCaptureDeviceInput(device: captureDevice!)
-            if captureSession.canAddInput(input) {
-                captureSession.addInput(input)
-                
-            }
-        } catch let err {
-            print("Could not setup camera input: ", err)
-            return
-        }
-
-        // Output setup
-        if captureSession.canAddOutput(output) {
-            captureSession.addOutput(output)
-        }
-        
-        // Preview setup
-        let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        
-        previewLayer.frame = view.frame
-        view.layer.addSublayer(previewLayer)
-        
-        captureSession.startRunning()
-    }
-    
-    
-}
-
-// MARK: - Handlers 
-
-extension CameraController {
     @objc func handleCapturePhoto() {
+        print("Capturing photo...")
         
         let settings = AVCapturePhotoSettings()
         
@@ -135,7 +76,52 @@ extension CameraController {
         output.capturePhoto(with: settings, delegate: self)
     }
     
-    @objc func handleDismiss() {
-        dismiss(animated: true, completion: nil)
+    func photoOutput(_ captureOutput: AVCapturePhotoOutput, didFinishProcessingPhoto photoSampleBuffer: CMSampleBuffer?, previewPhoto previewPhotoSampleBuffer: CMSampleBuffer?, resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Error?) {
+        
+        let imageData = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: photoSampleBuffer!, previewPhotoSampleBuffer: previewPhotoSampleBuffer!)
+        
+        let previewImage = UIImage(data: imageData!)
+        
+        let containerView = PreviewPhotoContainerView()
+        containerView.previewImageView.image = previewImage
+        view.addSubview(containerView)
+        containerView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+        
+        /*let previewImageView = UIImageView(image: previewImage)
+         view.addSubview(previewImageView)
+         previewImageView.anchor(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 0, paddingLeft: 0, paddingBottom: 0, paddingRight: 0, width: 0, height: 0)
+         
+         print("Finish processing photo sample buffer...")*/
+        
     }
+    
+    let output = AVCapturePhotoOutput()
+    fileprivate func setupCaptureSession() {
+        let captureSession = AVCaptureSession()
+        
+        //1. setup inputs
+        let captureDevice = AVCaptureDevice.default(for: AVMediaType.video)
+        
+        do {
+            let input = try AVCaptureDeviceInput(device: captureDevice!)
+            if captureSession.canAddInput(input) {
+                captureSession.addInput(input)
+            }
+        } catch let err {
+            print("Could not setup camera input:", err)
+        }
+        
+        //2. setup outputs
+        if captureSession.canAddOutput(output) {
+            captureSession.addOutput(output)
+        }
+        
+        //3. setup output preview
+        let previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer.frame = view.frame
+        view.layer.addSublayer(previewLayer)
+        
+        captureSession.startRunning()
+    }
+    
 }

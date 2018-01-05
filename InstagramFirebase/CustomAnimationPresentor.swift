@@ -15,16 +15,19 @@ class CustomAnimationPresentor: NSObject, UIViewControllerAnimatedTransitioning 
     }
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        //my custom transition animation code logic
         
         let containerView = transitionContext.containerView
-        guard let fromView = transitionContext.view(forKey: .from), let toView = transitionContext.view(forKey: .to) else { return }
+        guard let fromView = transitionContext.view(forKey: .from) else { return }
+        guard let toView = transitionContext.view(forKey: .to) else { return }
         
         containerView.addSubview(toView)
         
         let startingFrame = CGRect(x: -toView.frame.width, y: 0, width: toView.frame.width, height: toView.frame.height)
         toView.frame = startingFrame
         
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: { 
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+            //animation??
             
             toView.frame = CGRect(x: 0, y: 0, width: toView.frame.width, height: toView.frame.height)
             
@@ -36,3 +39,4 @@ class CustomAnimationPresentor: NSObject, UIViewControllerAnimatedTransitioning 
     }
     
 }
+

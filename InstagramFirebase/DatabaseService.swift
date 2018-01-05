@@ -9,8 +9,8 @@
 import Foundation
 import FirebaseDatabase
 
-typealias DataSnapshotCompletion = (_ metadata: FIRDataSnapshot) -> Void
-typealias DatabaseReferenceCompletion = (_ errorMsg: String?, _ ref: FIRDatabaseReference?) -> Void
+typealias DataSnapshotCompletion = (_ metadata: DataSnapshot) -> Void
+typealias DatabaseReferenceCompletion = (_ errorMsg: String?, _ ref: DatabaseReference?) -> Void
 
 fileprivate let FIR_CHILD_USERS = "users"
 fileprivate let FIR_CHILD_USERNAMES = "usernames"
@@ -41,39 +41,39 @@ class DatabaseService {
         return _shared
     }
     
-    var rootRef: FIRDatabaseReference {
-        return FIRDatabase.database().reference()
+    var rootRef: DatabaseReference {
+        return Database.database().reference()
     }
     
-    var usersRef: FIRDatabaseReference {
+    var usersRef: DatabaseReference {
         return rootRef.child(FIR_CHILD_USERS)
     }
     
-    var usernamesRef: FIRDatabaseReference {
+    var usernamesRef: DatabaseReference {
         return rootRef.child(FIR_CHILD_USERNAMES)
     }
     
-    var messagesRef: FIRDatabaseReference {
+    var messagesRef: DatabaseReference {
         return rootRef.child(FIR_CHILD_MESSAGES)
     }
     
-    var userMessagesRef: FIRDatabaseReference {
+    var userMessagesRef: DatabaseReference {
         return rootRef.child(FIR_CHILD_USER_MESSAGES)
     }
     
-    var postsRef: FIRDatabaseReference {
+    var postsRef: DatabaseReference {
         return rootRef.child(FIR_CHILD_POSTS)
     }
     
-    var followingRef: FIRDatabaseReference {
+    var followingRef: DatabaseReference {
         return rootRef.child(FIR_CHILD_FOLLOWING)
     }
     
-    var commentsRef: FIRDatabaseReference {
+    var commentsRef: DatabaseReference {
         return rootRef.child(FIR_CHILD_COMMENTS)
     }
     
-    var likesRef: FIRDatabaseReference {
+    var likesRef: DatabaseReference {
         return rootRef.child(FIR_CHILD_LIKES)
     }
     
@@ -107,7 +107,7 @@ class DatabaseService {
         }
     }
     
-    fileprivate func saveFanData(childRef: FIRDatabaseReference, firstChild: String?, secondChild: String?, onComplete: DatabaseReferenceCompletion?) {
+    fileprivate func saveFanData(childRef: DatabaseReference, firstChild: String?, secondChild: String?, onComplete: DatabaseReferenceCompletion?) {
         guard let first = firstChild, let second = secondChild else { return }
         
         let senderRef = childRef.child(first).child(second)
@@ -131,7 +131,7 @@ class DatabaseService {
     }
     
     /// For simple retrieval such as a single message or a user
-    func retrieveOnce(type: DataTypes, eventType: FIRDataEventType, firstChild: String?, secondChild: String?, propagate: Bool?, sortBy: String?, onComplete: DataSnapshotCompletion?) {
+    func retrieveOnce(type: DataTypes, eventType: DataEventType, firstChild: String?, secondChild: String?, propagate: Bool?, sortBy: String?, onComplete: DataSnapshotCompletion?) {
         guard let ref = getRef(type: type, firstChild: firstChild, secondChild: secondChild) else { return }
         
         let sort = sortBy ?? ""
@@ -159,7 +159,7 @@ class DatabaseService {
     
     /// For complex retrievals such as user-messages (one or two level search) and a retrieval of group of users or messages (one level search)
     /// Propagation is used to retrieve second set of data after concluding the first set of data.
-    func retrieve(type: DataTypes, eventType: FIRDataEventType, firstChild: String?, secondChild: String?, propagate: Bool?, sortBy: String?, onComplete: DataSnapshotCompletion?) {
+    func retrieve(type: DataTypes, eventType: DataEventType, firstChild: String?, secondChild: String?, propagate: Bool?, sortBy: String?, onComplete: DataSnapshotCompletion?) {
         guard let ref = getRef(type: type, firstChild: firstChild, secondChild: secondChild) else { return }
         
         let sort = sortBy ?? ""
@@ -182,7 +182,7 @@ class DatabaseService {
     }
     
     // For unknown toId
-    fileprivate func retrieveFanObjects(childRef: FIRDatabaseReference, eventType: FIRDataEventType, sortBy: String, onComplete: DataSnapshotCompletion?) {
+    fileprivate func retrieveFanObjects(childRef: DatabaseReference, eventType: DataEventType, sortBy: String, onComplete: DataSnapshotCompletion?) {
         if sortBy == "" {
             childRef.observe(.childAdded, with: { (snapshot) in
                 let typeId = snapshot.key
@@ -216,11 +216,11 @@ class DatabaseService {
     }
     
     // Used to get refs for retrievals and removals
-    fileprivate func getRef(type: DataTypes, firstChild: String?, secondChild: String?, fan: Bool = false) -> FIRDatabaseReference? {
+    fileprivate func getRef(type: DataTypes, firstChild: String?, secondChild: String?, fan: Bool = false) -> DatabaseReference? {
         let first = firstChild ?? ""
         let second = secondChild ?? ""
         
-        var ref: FIRDatabaseReference
+        var ref: DatabaseReference
         
         switch type {
         case .user: ref = usersRef
