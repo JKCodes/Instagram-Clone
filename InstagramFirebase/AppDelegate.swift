@@ -11,7 +11,7 @@ import Firebase
 import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
 
@@ -39,10 +39,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
         print("Registered with FCM with token:", fcmToken)
     }
     
+    // listen for user notifications
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler(.alert)
+    }
+    
     private func attemptRegisterForNotification(application: UIApplication) {
         print("Attempting to register APNS...")
         
         Messaging.messaging().delegate = self
+        UNUserNotificationCenter.current().delegate = self
         
         // user notifications authorization
         // iOS 10+
