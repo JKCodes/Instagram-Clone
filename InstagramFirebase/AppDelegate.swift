@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -25,7 +26,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         window?.rootViewController = CustomTabBarController()
         
+        attemptRegisterForNotification(application: application)
+        
         return true
+    }
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        print("Registered for notifictions: ", deviceToken)
+    }
+    
+    private func attemptRegisterForNotification(application: UIApplication) {
+        print("Attempting to register APNS...")
+        
+        // user notifications authorization
+        // iOS 10+
+        let options: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(options: options) { (granted, err) in
+            if let err = err {
+                print("Failed to request auth:", err)
+                return
+            }
+            
+            if granted {
+                print("Auth granted.")
+            } else {
+                print("Auth denied.")
+            }
+        }
+        
+        
+        application.registerForRemoteNotifications()
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
